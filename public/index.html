@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Club Lab — קביעת תור</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#050508;--surface:rgba(17,17,17,0.85);--surface2:rgba(26,26,26,0.9);
+  --pink:#ff2d8a;--pink-dim:rgba(255,45,138,0.1);--pink-border:rgba(255,45,138,0.25);
+  --text:#f5f5f5;--muted:#888;--border:rgba(255,255,255,0.07);--radius:12px;
+}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;min-height:100vh;overflow-x:hidden;}
+.bg-wrap{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.bg-wrap img{width:100%;height:100%;object-fit:cover;opacity:0.2;filter:saturate(0.6) brightness(0.5);}
+.bg-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,5,8,0.6) 0%,rgba(5,5,8,0.3) 40%,rgba(5,5,8,0.8) 100%);}
+.page{position:relative;z-index:1;}
+nav{position:sticky;top:0;z-index:100;background:rgba(5,5,8,0.93);backdrop-filter:blur(16px);border-bottom:0.5px solid var(--pink-border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;}
+.logo-wrap{display:flex;align-items:center;gap:10px;}
+.logo-img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1.5px solid var(--pink-border);}
+.logo-text{display:flex;flex-direction:column;line-height:1.2;}
+.logo-main{font-size:13px;font-weight:900;letter-spacing:.4px;}
+.logo-sub{font-size:9px;color:var(--pink);}
+.nav-links{display:flex;gap:18px;list-style:none;}
+.nav-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--text);}
+.hero{text-align:center;padding:56px 20px 40px;position:relative;}
+.hero::before{content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:500px;height:260px;background:radial-gradient(ellipse,rgba(255,45,138,0.12) 0%,transparent 70%);pointer-events:none;}
+.hero-logo{width:90px;height:90px;border-radius:50%;object-fit:cover;margin:0 auto 16px;display:block;border:2px solid var(--pink-border);box-shadow:0 0 32px rgba(255,45,138,0.2);animation:fadeUp .5s ease both;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--pink-dim);border:.5px solid var(--pink-border);border-radius:20px;padding:5px 13px;font-size:12px;color:var(--pink);margin-bottom:14px;animation:fadeUp .5s .08s ease both;}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--pink);animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+h1{font-size:clamp(28px,7vw,50px);font-weight:900;line-height:1.1;margin-bottom:12px;animation:fadeUp .5s .12s ease both;}
+.h1-accent{color:var(--pink);}
+.hero-sub{font-size:15px;color:var(--muted);max-width:380px;margin:0 auto 28px;line-height:1.7;animation:fadeUp .5s .18s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.booking-container{max-width:460px;margin:0 auto;animation:fadeUp .5s .22s ease both;}
+.steps{display:flex;justify-content:center;align-items:center;gap:7px;margin-bottom:20px;}
+.step-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);transition:color .3s;}
+.step-item.active{color:var(--pink);}
+.step-item.done{color:var(--pink);opacity:.55;}
+.step-num{width:21px;height:21px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all .3s;}
+.step-item.active .step-num{background:var(--pink);border-color:var(--pink);color:#fff;}
+.step-item.done .step-num{background:rgba(255,45,138,.3);border-color:var(--pink);color:#fff;}
+.step-line{width:24px;height:1px;background:var(--pink-border);}
+.booking-card{background:var(--surface);backdrop-filter:blur(20px);border:.5px solid var(--pink-border);border-radius:16px;padding:24px 20px;}
+.card-title{font-size:17px;font-weight:700;margin-bottom:4px;}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.week-badge{display:inline-flex;align-items:center;background:rgba(110,231,255,.08);border:.5px solid rgba(110,231,255,.25);border-radius:8px;padding:4px 10px;font-size:12px;color:#6ee7ff;margin-bottom:12px;direction:ltr;}
+.phone-wrap{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--pink-border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s;margin-bottom:13px;}
+.phone-wrap:focus-within{border-color:var(--pink);}
+.phone-prefix{padding:12px 12px;font-size:13px;color:var(--muted);border-left:1px solid var(--pink-border);background:rgba(255,45,138,.05);user-select:none;}
+.phone-input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Heebo',sans-serif;font-size:17px;font-weight:500;padding:12px 13px;letter-spacing:1px;direction:ltr;text-align:right;}
+.phone-input::placeholder{color:var(--muted);letter-spacing:0;}
+.btn-primary{width:100%;padding:13px;background:var(--pink);border:none;border-radius:var(--radius);color:#fff;font-family:'Heebo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+.btn-secondary{background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Heebo',sans-serif;font-size:13px;padding:9px 16px;cursor:pointer;transition:all .2s;margin-top:9px;}
+.btn-secondary:hover{border-color:var(--pink);color:var(--pink);}
+.schedule-days{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.day-row{display:flex;align-items:center;gap:8px;}
+.day-label{min-width:42px;font-size:12px;font-weight:700;color:var(--muted);}
+.slots{display:flex;flex-wrap:wrap;gap:5px;}
+.slot{padding:5px 10px;background:var(--surface2);border:1px solid rgba(255,45,138,.2);border-radius:8px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s;direction:ltr;}
+.slot:hover{border-color:var(--pink);color:var(--pink);background:rgba(255,45,138,.08);}
+.slot.selected{background:var(--pink);border-color:var(--pink);color:#fff;font-weight:700;}
+.slot.evening{border-color:rgba(110,231,255,.22);}
+.slot.evening:hover{border-color:#6ee7ff;color:#6ee7ff;background:rgba(110,231,255,.08);}
+.slot.evening.selected{background:#6ee7ff;border-color:#6ee7ff;color:#050508;}
+.slot.booked{opacity:.35;cursor:not-allowed;pointer-events:none;text-decoration:line-through;}
+.slot-info{background:rgba(255,45,138,.07);border:1px solid rgba(255,45,138,.2);border-radius:var(--radius);padding:10px 13px;font-size:13px;margin-bottom:13px;display:none;}
+.slot-info.visible{display:block;}
+.slot-detail{display:flex;justify-content:space-between;align-items:center;}
+.slot-detail span:first-child{color:var(--muted);font-size:12px;}
+.slot-detail span:last-child{font-weight:600;color:var(--pink);}
+.confirm-icon{width:56px;height:56px;border-radius:50%;background:rgba(255,45,138,.1);border:1px solid rgba(255,45,138,.35);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes popIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.confirm-details{background:var(--surface2);border-radius:var(--radius);padding:13px;margin-bottom:14px;}
+.confirm-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:.5px solid var(--border);}
+.confirm-row:last-child{border-bottom:none;}
+.confirm-row span:first-child{color:var(--muted);}
+.confirm-row span:last-child{font-weight:600;}
+.whatsapp-btn{width:100%;padding:13px;background:#25D366;border:none;border-radius:var(--radius);color:#fff;font-family:'Heebo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:opacity .2s,transform .15s;}
+.whatsapp-btn:hover{opacity:.9;transform:translateY(-1px);}
+.app-banner{max-width:460px;margin:18px auto 0;background:var(--surface);backdrop-filter:blur(20px);border:.5px solid var(--pink-border);border-radius:16px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.app-text p:first-child{font-size:13px;font-weight:700;margin-bottom:3px;}
+.app-text p:last-child{font-size:11px;color:var(--muted);}
+.app-badges{display:flex;gap:7px;}
+.app-badge{padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;}
+.app-badge:hover{border-color:#6ee7ff;color:#6ee7ff;}
+.section{padding:48px 20px;max-width:660px;margin:0 auto;}
+.section-header{display:flex;align-items:center;gap:11px;margin-bottom:20px;}
+.section-line{width:3px;height:22px;border-radius:2px;}
+.line-pink{background:var(--pink);}
+.line-cyan{background:#6ee7ff;}
+.line-yellow{background:#ffd166;}
+.section-header h2{font-size:20px;font-weight:700;}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+.tip-card{background:var(--surface);backdrop-filter:blur(20px);border:.5px solid rgba(255,209,102,.2);border-radius:var(--radius);padding:15px;transition:border-color .2s;}
+.tip-card:hover{border-color:rgba(255,209,102,.5);}
+.tip-num{font-size:11px;font-weight:700;color:#ffd166;margin-bottom:5px;}
+.tip-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.tip-body{font-size:12px;color:var(--muted);line-height:1.65;}
+.news-grid{display:flex;flex-direction:column;gap:9px;}
+.news-card{background:var(--surface);backdrop-filter:blur(20px);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:15px 17px;display:flex;gap:13px;cursor:pointer;transition:border-color .2s;}
+.news-card:hover{border-color:rgba(255,45,138,.4);}
+.news-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.news-date{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.news-title{font-size:14px;font-weight:600;margin-bottom:3px;}
+.news-body{font-size:12px;color:var(--muted);line-height:1.6;}
+.about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin-bottom:13px;}
+.about-stat{background:var(--surface);backdrop-filter:blur(20px);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:15px;text-align:center;}
+.about-stat .num{font-size:28px;font-weight:900;color:var(--pink);}
+.about-stat .label{font-size:12px;color:var(--muted);margin-top:3px;}
+.about-desc{font-size:14px;color:var(--muted);line-height:1.8;background:var(--surface);backdrop-filter:blur(20px);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:16px;}
+.divider{height:.5px;background:var(--pink-border);max-width:660px;margin:0 auto;}
+.step{display:none;}
+.step.active{display:block;}
+footer{text-align:center;padding:22px;font-size:12px;color:var(--muted);border-top:.5px solid var(--pink-border);display:flex;align-items:center;justify-content:center;gap:9px;background:rgba(5,5,8,.85);backdrop-filter:blur(12px);position:relative;z-index:1;}
+.footer-logo{width:26px;height:26px;border-radius:50%;object-fit:cover;opacity:.55;}
+</style>
+</head>
+<body>
+<div class="bg-wrap"><img src="/images/bg_main.png" alt=""></div>
+<div class="page">
+<nav>
+  <div class="logo-wrap">
+    <img class="logo-img" src="/images/logo.jpg" alt="The Club Lab">
+    <div class="logo-text"><span class="logo-main">THE CLUB LAB</span><span class="logo-sub">המעבדה למקצועיות הקלאב</span></div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#booking">קביעת תור</a></li>
+    <li><a href="#tips">טיפים</a></li>
+    <li><a href="#news">חדשות</a></li>
+    <li><a href="#about">אודות</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <img class="hero-logo" src="/images/logo.jpg" alt="The Club Lab Logo">
+  <div class="hero-badge"><span class="pulse"></span>המעבדה למקצועיות הקלאב</div>
+  <h1>קבע תור<br><span class="h1-accent">תוך שניות</span></h1>
+  <p class="hero-sub">הכנס מספר טלפון, בחר זמן שמתאים לך — ואישור יגיע ישירות לוואטסאפ</p>
+
+  <div class="booking-container" id="booking">
+    <div class="steps" id="steps-indicator">
+      <div class="step-item active" id="si-1"><div class="step-num">1</div> טלפון</div>
+      <div class="step-line"></div>
+      <div class="step-item" id="si-2"><div class="step-num">2</div> בחירת זמן</div>
+      <div class="step-line"></div>
+      <div class="step-item" id="si-3"><div class="step-num">3</div> אישור</div>
+    </div>
+
+    <div class="booking-card step active" id="step1">
+      <div class="card-title">מה מספר הטלפון שלך?</div>
+      <div class="card-sub">נשלח אישור לוואטסאפ</div>
+      <div class="phone-wrap">
+        <span class="phone-prefix">🇮🇱 +972</span>
+        <input class="phone-input" type="tel" id="phone-field" placeholder="05X-XXX-XXXX" maxlength="10">
+      </div>
+      <button class="btn-primary" onclick="goStep2()">המשך ←</button>
+    </div>
+
+    <div class="booking-card step" id="step2">
+      <div class="card-title">בחר יום ושעה</div>
+      <div class="week-badge" id="week-label">טוען...</div>
+      <div class="schedule-days" id="schedule-rows"></div>
+      <div class="slot-info" id="slot-info">
+        <div class="slot-detail"><span>יום</span><span id="info-day">—</span></div>
+        <div class="slot-detail" style="margin-top:4px"><span>תאריך</span><span id="info-date">—</span></div>
+        <div class="slot-detail" style="margin-top:4px"><span>שעה</span><span id="info-time">—</span></div>
+      </div>
+      <button class="btn-primary" id="confirm-btn" onclick="goStep3()" style="opacity:.4;pointer-events:none">אשר תור ←</button>
+      <br><button class="btn-secondary" onclick="goStep1()">← חזרה</button>
+    </div>
+
+    <div class="booking-card step" id="step3" style="text-align:center">
+      <div class="confirm-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff2d8a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="card-title" style="text-align:center">התור נקבע!</div>
+      <div class="card-sub" style="text-align:center;margin-bottom:14px">פרטי התור שלך</div>
+      <div class="confirm-details" style="text-align:right">
+        <div class="confirm-row"><span>טלפון</span><span id="confirm-phone">—</span></div>
+        <div class="confirm-row"><span>יום</span><span id="confirm-day">—</span></div>
+        <div class="confirm-row"><span>תאריך</span><span id="confirm-date">—</span></div>
+        <div class="confirm-row"><span>שעה</span><span id="confirm-time">—</span></div>
+        <div class="confirm-row"><span>מיקום</span><span>The Club Lab</span></div>
+      </div>
+      <button class="whatsapp-btn" onclick="openWhatsApp()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        אישור בוואטסאפ
+      </button>
+      <br><button class="btn-secondary" onclick="resetBooking()">קביעת תור נוסף</button>
+    </div>
+  </div>
+
+  <div class="app-banner">
+    <div class="app-text"><p>הורד את האפליקציה</p><p>גישה ישירה ליומן ועדכונים — ללא הרשמה</p></div>
+    <div class="app-badges"><div class="app-badge">📱 iOS</div><div class="app-badge">🤖 Android</div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="section" id="tips">
+  <div class="section-header"><div class="section-line line-yellow"></div><h2>טיפים שבועיים של בן</h2></div>
+  <div class="tips-grid">
+    <div class="tip-card"><div class="tip-num">טיפ #01</div><div class="tip-title">EQ לפני Compressor</div><div class="tip-body">תמיד תנקה את הצליל עם EQ לפני שאתה מדחס — Compressor מגביר גם את הבעיות.</div></div>
+    <div class="tip-card"><div class="tip-num">טיפ #02</div><div class="tip-title">Gain Staging נכון</div><div class="tip-body">שמור על רמות כניסה בין -18 ל-12 dBFS. Headroom נכון שווה מיקס נקי.</div></div>
+    <div class="tip-card"><div class="tip-num">טיפ #03</div><div class="tip-title">מעברים חלקים</div><div class="tip-body">תרגל מעבר בין שירים ב-phrase של 8 beats. תן לאנרגיה לעלות לאט.</div></div>
+    <div class="tip-card"><div class="tip-num">טיפ #04</div><div class="tip-title">תקשיב בלי EQ</div><div class="tip-body">לפחות פעם בשבוע תקשיב לסטים שלך ברמקולים שטוחים.</div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="section" id="news">
+  <div class="section-header"><div class="section-line line-pink"></div><h2>חדשות ועדכונים</h2></div>
+  <div class="news-grid">
+    <div class="news-card"><div class="news-dot" style="background:#ff2d8a"></div><div><div class="news-date" id="news-date-1"></div><div class="news-title">לו"ז שבועי עלה לאוויר</div><div class="news-body">שעות הבוקר והערב זמינות לקביעה. ימי ראשון–חמישי פתוחים.</div></div></div>
+    <div class="news-card"><div class="news-dot" style="background:#888"></div><div><div class="news-date">10 מרץ 2026</div><div class="news-title">שיפורים במערכת הקביעה</div><div class="news-body">אישורים ישירות לוואטסאפ תוך שניות מסיום הקביעה.</div></div></div>
+    <div class="news-card"><div class="news-dot" style="background:#6ee7ff"></div><div><div class="news-date">1 מרץ 2026</div><div class="news-title">האפליקציה החדשה בדרך</div><div class="news-body">אפליקציה ל-iOS ו-Android — ללא הרשמה ידנית.</div></div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="section" id="about">
+  <div class="section-header"><div class="section-line line-cyan"></div><h2>אודות The Club Lab</h2></div>
+  <div class="about-grid">
+    <div class="about-stat"><div class="num">500+</div><div class="label">תלמידים בוגרים</div></div>
+    <div class="about-stat"><div class="num">8+</div><div class="label">שנות ניסיון</div></div>
+    <div class="about-stat"><div class="num">100%</div><div class="label">מקצועיות</div></div>
+  </div>
+  <div class="about-desc">The Club Lab היא המעבדה למקצועיות הקלאב — מרכז הכשרה מוביל לדיג'ייז ומפיקים מוזיקליים. אצלנו תמצא תוכניות לימוד מותאמות אישית, ציוד מקצועי ברמה הגבוהה ביותר, וצוות מדריכים עם ניסיון בתעשייה.</div>
+</div>
+
+<footer>
+  <img class="footer-logo" src="/images/logo.jpg" alt="logo">
+  © 2026 The Club Lab · כל הזכויות שמורות
+</footer>
+</div>
+
+<script>
+const API = '';
+const WA = '972548008645';
+let selDay='',selDate='',selTime='',phone='';
+
+async function loadSchedule(){
+  const res = await fetch(API+'/api/schedule');
+  const schedule = await res.json();
+  const appts = await fetch(API+'/api/appointments').then(r=>r.json());
+  const bookedSlots = appts.filter(a=>a.status!=='cancelled').map(a=>a.date+'_'+a.time);
+
+  const dates = getWeekDates();
+  document.getElementById('week-label').textContent = fmt(dates[0])+' – '+fmt(dates[4]);
+  document.getElementById('news-date-1').textContent = new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+
+  const rows = document.getElementById('schedule-rows');
+  rows.innerHTML='';
+  const dayNames=['ראשון','שני','שלישי','רביעי','חמישי'];
+  schedule.filter(d=>d.open).forEach((day,i)=>{
+    const date = dates[i];
+    const dateStr = fmt(date);
+    const row = document.createElement('div');
+    row.className='day-row';
+    row.innerHTML='<span class="day-label">'+day.day+'</span><div class="slots" id="slots-'+i+'"></div>';
+    rows.appendChild(row);
+    const slotsDiv = row.querySelector('.slots');
+    [...(day.morning||[]),...(day.evening||[])].forEach(t=>{
+      const isEvening = parseInt(t)>=18;
+      const isBooked = bookedSlots.includes(dateStr+'_'+t);
+      const s = document.createElement('div');
+      s.className='slot'+(isEvening?' evening':'')+(isBooked?' booked':'');
+      s.textContent=t;
+      if(!isBooked) s.onclick=()=>selectSlot(s,day.day,dateStr,t);
+      slotsDiv.appendChild(s);
+    });
+  });
+}
+
+function getWeekDates(){
+  const today=new Date();
+  const dow=today.getDay();
+  const sun=new Date(today);
+  sun.setDate(today.getDate()-dow);
+  return Array.from({length:5},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d;});
+}
+function fmt(d){return d.getDate()+'.'+(d.getMonth()+1);}
+
+function selectSlot(el,day,date,time){
+  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  selDay=day;selDate=date;selTime=time;
+  document.getElementById('info-day').textContent=day;
+  document.getElementById('info-date').textContent=date;
+  document.getElementById('info-time').textContent=time;
+  document.getElementById('slot-info').classList.add('visible');
+  const btn=document.getElementById('confirm-btn');
+  btn.style.opacity='1';btn.style.pointerEvents='auto';
+}
+
+function goStep2(){
+  const p=document.getElementById('phone-field').value.replace(/\D/g,'');
+  if(p.length<9){document.querySelector('.phone-wrap').style.borderColor='#ff4444';setTimeout(()=>document.querySelector('.phone-wrap').style.borderColor='',1200);return;}
+  phone=p;loadSchedule();setStep(2);
+}
+function goStep1(){setStep(1);}
+async function goStep3(){
+  if(!selDay||!selTime)return;
+  await fetch(API+'/api/appointments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:'+972-'+phone,day:selDay,date:selDate,time:selTime,status:'pending'})});
+  document.getElementById('confirm-phone').textContent='+972-'+phone;
+  document.getElementById('confirm-day').textContent=selDay;
+  document.getElementById('confirm-date').textContent=selDate;
+  document.getElementById('confirm-time').textContent=selTime;
+  setStep(3);
+}
+function setStep(n){
+  document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('active',i===n-1));
+  [1,2,3].forEach(i=>{const si=document.getElementById('si-'+i);si.classList.remove('active','done');if(i===n)si.classList.add('active');if(i<n)si.classList.add('done');});
+}
+function openWhatsApp(){
+  const msg=encodeURIComponent('שלום! קבעתי תור ב-The Club Lab 🎧\nיום: '+selDay+' ('+selDate+')\nשעה: '+selTime+'\nטלפון: +972-'+phone);
+  window.open('https://wa.me/'+WA+'?text='+msg,'_blank');
+}
+function resetBooking(){selDay='';selDate='';selTime='';phone='';document.getElementById('phone-field').value='';document.getElementById('slot-info').classList.remove('visible');const btn=document.getElementById('confirm-btn');btn.style.opacity='.4';btn.style.pointerEvents='none';setStep(1);}
+
+document.querySelectorAll('.nav-links a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();document.getElementById(a.getAttribute('href').slice(1))?.scrollIntoView({behavior:'smooth'});});
+});
+</script>
+</body>
+</html>

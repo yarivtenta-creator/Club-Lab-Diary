@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Club Lab — ניהול</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--surface3:#222;--pink:#ff2d8a;--pink-dim:rgba(255,45,138,.12);--pink-border:rgba(255,45,138,.25);--text:#f5f5f5;--muted:#888;--border:rgba(255,255,255,.07);--radius:10px;--sidebar:210px;}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+.app{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--surface);border-left:.5px solid var(--border);display:flex;flex-direction:column;}
+.sidebar-head{padding:14px 12px;border-bottom:.5px solid var(--border);display:flex;align-items:center;gap:8px;}
+.s-logo{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid var(--pink-border);}
+.s-brand{display:flex;flex-direction:column;line-height:1.2;}
+.s-brand span:first-child{font-size:11px;font-weight:900;}
+.s-brand span:last-child{font-size:9px;color:var(--pink);}
+.nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;margin:1px 5px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all .15s;border:none;background:none;width:calc(100% - 10px);text-align:right;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:var(--pink-dim);color:var(--pink);border:.5px solid var(--pink-border);}
+.nav-icon{width:15px;height:15px;flex-shrink:0;}
+.nav-section{padding:10px 8px 3px;font-size:9px;font-weight:700;color:#444;letter-spacing:.08em;text-transform:uppercase;}
+.sidebar-footer{margin-top:auto;padding:10px 12px;border-top:.5px solid var(--border);font-size:11px;color:#444;}
+.online-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#25D366;margin-left:4px;vertical-align:middle;}
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.topbar{padding:11px 18px;border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:10;flex-shrink:0;}
+.topbar-title{font-size:15px;font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-date{font-size:12px;color:var(--muted);}
+.add-btn{padding:7px 13px;background:var(--pink);border:none;border-radius:8px;color:#fff;font-family:'Heebo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.add-btn:hover{opacity:.85;}
+.page{display:none;flex:1;padding:16px 18px;flex-direction:column;gap:14px;}
+.page.active{display:flex;}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.stat-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);padding:13px;}
+.stat-card.hl{border-color:var(--pink-border);background:var(--pink-dim);}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.stat-val{font-size:22px;font-weight:900;line-height:1;}
+.stat-val.pink{color:var(--pink);}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.diary-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;flex:1;min-height:0;}
+.diary-col{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+.col-head{padding:9px 13px;border-bottom:.5px solid var(--border);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
+.col-date{font-size:11px;color:var(--muted);font-weight:400;}
+.appt-list{flex:1;overflow-y:auto;padding:7px;}
+.appt{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;margin-bottom:3px;cursor:pointer;transition:background .15s;border:.5px solid transparent;}
+.appt:hover{background:var(--surface2);border-color:var(--border);}
+.appt.confirmed{border-right:2px solid var(--pink);}
+.appt.pending{border-right:2px solid #ffd166;}
+.appt.cancelled{border-right:2px solid #444;opacity:.45;}
+.appt-time{font-size:11px;font-weight:700;color:var(--muted);min-width:34px;direction:ltr;}
+.appt-info{flex:1;}
+.appt-name{font-size:13px;font-weight:600;margin-bottom:1px;}
+.appt-type{font-size:11px;color:var(--muted);}
+.appt-status{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;}
+.s-confirmed{background:var(--pink-dim);color:var(--pink);}
+.s-pending{background:rgba(255,209,102,.12);color:#ffd166;}
+.s-cancelled{background:var(--surface3);color:var(--muted);}
+.empty-slot{padding:7px 9px;border-radius:8px;border:1px dashed var(--border);font-size:11px;color:#444;margin-bottom:3px;text-align:center;cursor:pointer;transition:border-color .15s;}
+.empty-slot:hover{border-color:var(--pink-border);color:var(--pink);}
+.clients-toolbar{display:flex;gap:8px;}
+.search-input{flex:1;background:var(--surface2);border:.5px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);font-family:'Heebo',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--pink-border);}
+.search-input::placeholder{color:#444;}
+.clients-table{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.ct-head{display:grid;grid-template-columns:1fr 110px 70px 70px 60px;padding:8px 13px;background:var(--surface2);border-bottom:.5px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);}
+.ct-row{display:grid;grid-template-columns:1fr 110px 70px 70px 60px;padding:9px 13px;border-bottom:.5px solid var(--border);font-size:13px;cursor:pointer;transition:background .15s;}
+.ct-row:last-child{border-bottom:none;}
+.ct-row:hover{background:var(--surface2);}
+.ct-name{font-weight:600;display:flex;align-items:center;gap:7px;}
+.avatar{width:22px;height:22px;border-radius:50%;background:var(--pink-dim);border:1px solid var(--pink-border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--pink);flex-shrink:0;}
+.vbadge{display:inline-block;background:var(--surface3);padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;}
+.week-editor{display:flex;flex-direction:column;gap:7px;}
+.day-editor-row{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);padding:11px 13px;display:flex;align-items:center;gap:11px;}
+.day-editor-name{min-width:42px;font-size:13px;font-weight:700;}
+.slots-edit{display:flex;flex-wrap:wrap;gap:5px;flex:1;}
+.slot-tag{padding:4px 9px;border-radius:6px;font-size:12px;font-weight:600;direction:ltr;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;}
+.slot-morning{background:rgba(110,231,255,.08);border:.5px solid rgba(110,231,255,.25);color:#6ee7ff;}
+.slot-evening{background:var(--pink-dim);border:.5px solid var(--pink-border);color:var(--pink);}
+.slot-tag:hover{opacity:.7;}
+.add-slot-btn{padding:4px 9px;border-radius:6px;font-size:12px;font-weight:600;background:var(--surface3);border:.5px dashed var(--border);color:var(--muted);cursor:pointer;transition:all .15s;}
+.add-slot-btn:hover{border-color:var(--pink-border);color:var(--pink);}
+.toggle-wrap{display:flex;align-items:center;gap:5px;margin-right:auto;}
+.toggle{width:32px;height:17px;border-radius:9px;background:var(--surface3);position:relative;cursor:pointer;border:none;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--pink);}
+.toggle::after{content:'';position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:right .2s;}
+.toggle.on::after{right:17px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.chart-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);padding:13px;}
+.chart-title{font-size:12px;font-weight:700;margin-bottom:11px;color:var(--muted);}
+.bar-chart{display:flex;align-items:flex-end;gap:5px;height:75px;}
+.bar-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;}
+.bar{width:100%;border-radius:4px 4px 0 0;background:var(--pink-dim);border:.5px solid var(--pink-border);min-height:4px;}
+.bar.full{background:var(--pink);border-color:var(--pink);}
+.bar-label{font-size:9px;color:var(--muted);}
+.bar-val{font-size:9px;font-weight:700;color:var(--pink);}
+.kpi-list{display:flex;flex-direction:column;gap:7px;}
+.kpi-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;}
+.kpi-row span:first-child{color:var(--muted);}
+.kpi-row span:last-child{font-weight:700;}
+.up{color:#25D366;}.down{color:#e24b4a;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:.5px solid var(--pink-border);border-radius:14px;padding:20px;width:300px;animation:popIn .25s ease both;}
+@keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;}
+.modal-field{margin-bottom:11px;}
+.modal-field label{font-size:11px;color:var(--muted);margin-bottom:3px;display:block;}
+.modal-input{width:100%;background:var(--surface2);border:.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Heebo',sans-serif;font-size:13px;outline:none;}
+.modal-input:focus{border-color:var(--pink-border);}
+.modal-btns{display:flex;gap:7px;margin-top:14px;}
+.modal-save{flex:1;padding:10px;background:var(--pink);border:none;border-radius:8px;color:#fff;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.modal-cancel{padding:10px 13px;background:none;border:.5px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Heebo',sans-serif;font-size:13px;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <img class="s-logo" src="/images/logo.jpg" alt="logo">
+      <div class="s-brand"><span>THE CLUB LAB</span><span>מערכת ניהול</span></div>
+    </div>
+    <div class="nav-section">ראשי</div>
+    <button class="nav-item active" onclick="showPage('diary',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      יומן
+    </button>
+    <button class="nav-item" onclick="showPage('clients',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      לקוחות
+    </button>
+    <button class="nav-item" onclick="showPage('schedule',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      לו"ז שבועי
+    </button>
+    <button class="nav-item" onclick="showPage('stats',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      סטטיסטיקות
+    </button>
+    <div class="sidebar-footer"><span class="online-dot"></span>מחובר · בן</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">יומן</div>
+      <div class="topbar-right">
+        <span class="topbar-date" id="today-label"></span>
+        <button class="add-btn" onclick="openModal()">+ תור חדש</button>
+      </div>
+    </div>
+
+    <!-- DIARY -->
+    <div class="page active" id="page-diary">
+      <div class="stat-row" id="diary-stats"></div>
+      <div class="diary-grid">
+        <div class="diary-col">
+          <div class="col-head"><span>בוקר</span><span class="col-date" id="diary-date"></span></div>
+          <div class="appt-list" id="morning-list"></div>
+        </div>
+        <div class="diary-col">
+          <div class="col-head"><span>ערב</span><span class="col-date" id="diary-date2"></span></div>
+          <div class="appt-list" id="evening-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="page" id="page-clients">
+      <div class="clients-toolbar">
+        <input class="search-input" placeholder="חיפוש לקוח..." oninput="filterClients(this.value)">
+      </div>
+      <div class="clients-table">
+        <div class="ct-head"><span>שם</span><span>טלפון</span><span>ביקורים</span><span>אחרון</span><span></span></div>
+        <div id="clients-body"></div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="page" id="page-schedule">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">שינויים מתעדכנים אוטומטית ב-landing page</div>
+      <div class="week-editor" id="week-editor"></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="page" id="page-stats">
+      <div class="stat-row">
+        <div class="stat-card hl"><div class="stat-label">הכנסה החודש</div><div class="stat-val pink" id="stat-revenue">₪0</div><div class="stat-sub">+18% מחודש שעבר</div></div>
+        <div class="stat-card"><div class="stat-label">תורים החודש</div><div class="stat-val" id="stat-appts">0</div></div>
+        <div class="stat-card"><div class="stat-label">לקוחות</div><div class="stat-val" id="stat-clients">0</div></div>
+        <div class="stat-card"><div class="stat-label">ביטולים</div><div class="stat-val" id="stat-cancels">0</div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="chart-card"><div class="chart-title">תורים לפי יום</div><div class="bar-chart" id="bar-chart"></div></div>
+        <div class="chart-card"><div class="chart-title">מדדי ביצוע</div><div class="kpi-list"><div class="kpi-row"><span>שיעור אישור</span><span class="up" id="kpi-confirm">—</span></div><div class="kpi-row"><span>שיעור ביטול</span><span class="down" id="kpi-cancel">—</span></div><div class="kpi-row"><span>לקוחות חוזרים</span><span class="up">71%</span></div><div class="kpi-row"><span>ממוצע/תור</span><span id="kpi-avg">—</span></div></div></div>
+        <div class="chart-card"><div class="chart-title">פיצול בוקר/ערב</div><div id="time-split"></div></div>
+        <div class="chart-card"><div class="chart-title">סוגי שיעורים</div><div class="kpi-list" id="type-breakdown"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-title-text">תור חדש</span><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="modal-field"><label>שם לקוח</label><input class="modal-input" id="m-name" placeholder="שם מלא"></div>
+    <div class="modal-field"><label>טלפון</label><input class="modal-input" id="m-phone" placeholder="05X-XXXXXXX" dir="ltr"></div>
+    <div class="modal-field"><label>סוג שיעור</label><select class="modal-input" id="m-type"><option>DJ מתחיל</option><option>הפקה מוזיקלית</option><option>מיקסינג מתקדם</option></select></div>
+    <div class="modal-field" style="display:flex;gap:7px;">
+      <div style="flex:1"><label>יום</label><select class="modal-input" id="m-day"><option>ראשון</option><option>שני</option><option>שלישי</option><option>רביעי</option><option>חמישי</option></select></div>
+      <div style="flex:1"><label>שעה</label><select class="modal-input" id="m-time"><option>10:30</option><option>12:30</option><option>20:00</option><option>20:30</option><option>22:00</option><option>22:30</option></select></div>
+    </div>
+    <div class="modal-btns"><button class="modal-cancel" onclick="closeModal()">ביטול</button><button class="modal-save" onclick="saveAppt()">שמור ✓</button></div>
+  </div>
+</div>
+
+<script>
+const API='';
+let allAppts=[],allClients=[],allSchedule=[];
+
+async function init(){
+  const now=new Date();
+  document.getElementById('today-label').textContent=now.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
+  const dateStr=now.getDate()+'.'+(now.getMonth()+1);
+  document.getElementById('diary-date').textContent=dateStr;
+  document.getElementById('diary-date2').textContent=dateStr;
+  await Promise.all([loadDiary(),loadClients(),loadScheduleEditor(),loadStats()]);
+}
+
+async function loadDiary(){
+  const res=await fetch(API+'/api/appointments/today');
+  const appts=await res.json();
+  allAppts=appts;
+  const morning=appts.filter(a=>parseInt(a.time)<18);
+  const evening=appts.filter(a=>parseInt(a.time)>=18);
+  renderAppts('morning-list',morning);
+  renderAppts('evening-list',evening);
+  document.getElementById('diary-stats').innerHTML=`
+    <div class="stat-card hl"><div class="stat-label">תורים היום</div><div class="stat-val pink">${appts.length}</div></div>
+    <div class="stat-card"><div class="stat-label">ממתינים</div><div class="stat-val">${appts.filter(a=>a.status==='pending').length}</div></div>
+    <div class="stat-card"><div class="stat-label">אושרו</div><div class="stat-val">${appts.filter(a=>a.status==='confirmed').length}</div></div>
+    <div class="stat-card"><div class="stat-label">בוטלו</div><div class="stat-val">${appts.filter(a=>a.status==='cancelled').length}</div></div>`;
+}
+
+function renderAppts(containerId,appts){
+  const el=document.getElementById(containerId);
+  if(!appts.length){el.innerHTML='<div class="empty-slot" onclick="openModal()">+ הוסף תור</div>';return;}
+  el.innerHTML=appts.map(a=>`
+    <div class="appt ${a.status}" onclick="editAppt('${a._id}','${a.status}')">
+      <span class="appt-time">${a.time}</span>
+      <div class="appt-info"><div class="appt-name">${a.name||a.phone}</div><div class="appt-type">${a.type||''}</div></div>
+      <span class="appt-status s-${a.status}">${a.status==='confirmed'?'אושר':a.status==='pending'?'ממתין':'בוטל'}</span>
+    </div>`).join('')+'<div class="empty-slot" onclick="openModal()">+ הוסף תור</div>';
+}
+
+async function loadClients(){
+  const res=await fetch(API+'/api/clients');
+  allClients=await res.json();
+  renderClients(allClients);
+}
+
+function renderClients(list){
+  document.getElementById('clients-body').innerHTML=list.map(c=>{
+    const initials=(c.name||'לק').split(' ').map(w=>w[0]).join('').slice(0,2);
+    const lastStr=c.lastVisit?new Date(c.lastVisit).toLocaleDateString('he-IL',{day:'numeric',month:'numeric'}):'—';
+    return`<div class="ct-row"><span class="ct-name"><span class="avatar">${initials}</span>${c.name||c.phone}</span><span style="color:var(--muted);direction:ltr;font-size:12px">${c.phone}</span><span><span class="vbadge">${c.visits||0}</span></span><span style="color:var(--muted);font-size:12px">${lastStr}</span><span style="color:var(--pink);font-size:12px;cursor:pointer">✎</span></div>`;
+  }).join('');
+}
+
+function filterClients(q){renderClients(allClients.filter(c=>(c.name||'').includes(q)||(c.phone||'').includes(q)));}
+
+async function loadScheduleEditor(){
+  const res=await fetch(API+'/api/schedule');
+  allSchedule=await res.json();
+  const ed=document.getElementById('week-editor');
+  ed.innerHTML=allSchedule.map((day,i)=>`
+    <div class="day-editor-row">
+      <span class="day-editor-name">${day.day}</span>
+      <div class="slots-edit">
+        ${(day.morning||[]).map(t=>`<span class="slot-tag slot-morning">${t} <span style="opacity:.5;font-size:10px">✕</span></span>`).join('')}
+        ${(day.evening||[]).map(t=>`<span class="slot-tag slot-evening">${t} <span style="opacity:.5;font-size:10px">✕</span></span>`).join('')}
+        <span class="add-slot-btn" onclick="addSlot('${day.day}')">+ שעה</span>
+      </div>
+      <div class="toggle-wrap">
+        <button class="toggle ${day.open?'on':''}" onclick="toggleDay('${day.day}',this)"></button>
+        <span style="font-size:11px;color:var(--muted)">${day.open?'פתוח':'סגור'}</span>
+      </div>
+    </div>`).join('');
+}
+
+async function toggleDay(dayName,btn){
+  btn.classList.toggle('on');
+  const isOpen=btn.classList.contains('on');
+  btn.nextElementSibling.textContent=isOpen?'פתוח':'סגור';
+  await fetch(API+'/api/schedule/'+encodeURIComponent(dayName),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({open:isOpen})});
+}
+
+async function addSlot(dayName){
+  const t=prompt('הכנס שעה (לדוגמה 14:00):');
+  if(!t)return;
+  const day=allSchedule.find(d=>d.day===dayName);
+  if(!day)return;
+  const isEvening=parseInt(t)>=18;
+  if(isEvening)day.evening=[...(day.evening||[]),t];
+  else day.morning=[...(day.morning||[]),t];
+  await fetch(API+'/api/schedule/'+encodeURIComponent(dayName),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(day)});
+  loadScheduleEditor();
+}
+
+async function loadStats(){
+  const [appts,clients]=await Promise.all([fetch(API+'/api/appointments').then(r=>r.json()),fetch(API+'/api/clients').then(r=>r.json())]);
+  document.getElementById('stat-appts').textContent=appts.length;
+  document.getElementById('stat-clients').textContent=clients.length;
+  document.getElementById('stat-cancels').textContent=appts.filter(a=>a.status==='cancelled').length;
+  document.getElementById('stat-revenue').textContent='₪'+(appts.filter(a=>a.status==='confirmed').length*113).toLocaleString();
+  const confirmed=appts.filter(a=>a.status==='confirmed').length;
+  const cancelled=appts.filter(a=>a.status==='cancelled').length;
+  const total=appts.length||1;
+  document.getElementById('kpi-confirm').textContent=Math.round(confirmed/total*100)+'%';
+  document.getElementById('kpi-cancel').textContent=Math.round(cancelled/total*100)+'%';
+  document.getElementById('kpi-avg').textContent='₪113';
+  const days=['א','ב','ג','ד','ה'];
+  const dayCounts=days.map((_,i)=>appts.filter(a=>{const d=new Date(a.createdAt);return d.getDay()===i;}).length);
+  const mx=Math.max(...dayCounts,1);
+  document.getElementById('bar-chart').innerHTML=days.map((d,i)=>`<div class="bar-wrap"><span class="bar-val">${dayCounts[i]}</span><div class="bar ${dayCounts[i]===mx?'full':''}" style="height:${Math.round(dayCounts[i]/mx*68)}px"></div><span class="bar-label">${d}</span></div>`).join('');
+  const morning=appts.filter(a=>parseInt(a.time||'0')<18).length;
+  const evening=appts.length-morning;
+  document.getElementById('time-split').innerHTML=`
+    <div style="margin-top:6px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--muted)">בוקר</span><span>${Math.round(morning/total*100)}%</span></div>
+      <div style="height:5px;border-radius:3px;background:var(--surface3);overflow:hidden"><div style="width:${Math.round(morning/total*100)}%;height:100%;background:#6ee7ff;border-radius:3px"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:9px;margin-bottom:4px"><span style="color:var(--muted)">ערב</span><span>${Math.round(evening/total*100)}%</span></div>
+      <div style="height:5px;border-radius:3px;background:var(--surface3);overflow:hidden"><div style="width:${Math.round(evening/total*100)}%;height:100%;background:var(--pink);border-radius:3px"></div></div>
+    </div>`;
+  const types={};
+  appts.forEach(a=>{if(a.type)types[a.type]=(types[a.type]||0)+1;});
+  document.getElementById('type-breakdown').innerHTML=Object.entries(types).sort((a,b)=>b[1]-a[1]).map(([t,c])=>`<div class="kpi-row"><span>${t}</span><span>${c} תורים</span></div>`).join('')||'<div style="color:var(--muted);font-size:12px">אין נתונים עדיין</div>';
+}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  const titles={diary:'יומן',clients:'לקוחות',schedule:'לו"ז שבועי',stats:'סטטיסטיקות'};
+  document.getElementById('page-title').textContent=titles[id];
+  if(id==='stats')loadStats();
+  if(id==='clients')loadClients();
+  if(id==='schedule')loadScheduleEditor();
+  if(id==='diary')loadDiary();
+}
+
+function openModal(){document.getElementById('modal').classList.add('open');}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+async function saveAppt(){
+  const body={name:document.getElementById('m-name').value,phone:document.getElementById('m-phone').value,type:document.getElementById('m-type').value,day:document.getElementById('m-day').value,time:document.getElementById('m-time').value,status:'confirmed'};
+  await fetch(API+'/api/appointments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  closeModal();loadDiary();
+}
+async function editAppt(id,currentStatus){
+  const next=currentStatus==='pending'?'confirmed':currentStatus==='confirmed'?'cancelled':'pending';
+  if(confirm('שנה סטטוס ל-'+(next==='confirmed'?'אושר':next==='cancelled'?'בוטל':'ממתין')+'?')){
+    await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});
+    loadDiary();
+  }
+}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+init();
+</script>
+</body>
+</html>
