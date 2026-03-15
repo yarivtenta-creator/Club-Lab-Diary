@@ -163,7 +163,7 @@ footer{text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);bor
         <div class="slot-detail" style="margin-top:4px"><span>תאריך</span><span id="info-date">—</span></div>
         <div class="slot-detail" style="margin-top:4px"><span>שעה</span><span id="info-time">—</span></div>
       </div>
-      <button class="btn-primary" id="confirm-btn" onclick="goStep3()" style="opacity:.4;pointer-events:none">אשר תור ←</button>
+      <button class="btn-primary" id="confirm-btn" onclick="goStep3()" style="opacity:.4;pointer-events:none">אשר שיעור ←</button>
       <br><button class="btn-secondary" onclick="goStep1()">← חזרה</button>
     </div>
 
@@ -263,7 +263,11 @@ async function loadSchedule(){
         sd.appendChild(s);
       });
     });
-  }catch(e){document.getElementById('week-label').textContent='שגיאה';}
+  }catch(e){
+    document.getElementById('week-label').textContent='טוען מחדש...';
+    setTimeout(loadSchedule, 2000);
+  }
+}
 }
 
 function weekDates(){
