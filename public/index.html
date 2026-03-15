@@ -292,9 +292,8 @@ function goStep2(){
   else{
     const n=document.getElementById('name-field').value.trim();
     const p=document.getElementById('phone-field').value.replace(/\D/g,'');
-    if(!n){document.getElementById('name-field').style.border='1px solid #ff4444';setTimeout(()=>document.getElementById('name-field').style.border='',1200);return;}
     if(p.length<9){document.querySelector('.phone-wrap').style.borderColor='#ff4444';setTimeout(()=>document.querySelector('.phone-wrap').style.borderColor='',1200);return;}
-    phone=p;studentName=n;setSaved(n,p);
+    phone=p;studentName=n||'תלמיד';setSaved(n||'תלמיד',p);
   }
   loadSchedule();setStep(2);
 }
