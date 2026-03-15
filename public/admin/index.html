@@ -127,6 +127,10 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       יומן
     </button>
+    <button class="nav-item" onclick="showPage('lessons',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+      כל השיעורים
+    </button>
     <button class="nav-item" onclick="showPage('clients',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
       לקוחות
@@ -147,7 +151,7 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
       <div class="topbar-title" id="page-title">יומן</div>
       <div class="topbar-right">
         <span class="topbar-date" id="today-label"></span>
-        <button class="add-btn" onclick="openModal()">+ תור חדש</button>
+        <button class="add-btn" onclick="openModal()">+ שיעור חדש</button>
       </div>
     </div>
 
@@ -172,7 +176,7 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
         <input class="search-input" placeholder="חיפוש לקוח..." oninput="filterClients(this.value)">
       </div>
       <div class="clients-table">
-        <div class="ct-head"><span>שם</span><span>טלפון</span><span>ביקורים</span><span>אחרון</span><span></span></div>
+        <div class="ct-head"><span>שם</span><span>טלפון</span><span>שיעורים</span><span>אחרון</span><span>סטטוס</span></div>
         <div id="clients-body"></div>
       </div>
     </div>
@@ -181,6 +185,25 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
     <div class="page" id="page-schedule">
       <div style="font-size:12px;color:var(--muted);margin-bottom:2px;">שינויים מתעדכנים אוטומטית ב-landing page</div>
       <div class="week-editor" id="week-editor"></div>
+    </div>
+
+    <!-- ALL LESSONS -->
+    <div class="page" id="page-lessons">
+      <div class="clients-toolbar" style="gap:8px;display:flex;flex-wrap:wrap;">
+        <input class="search-input" placeholder="חיפוש שם או טלפון..." oninput="filterLessons(this.value)" style="flex:1;min-width:160px;">
+        <select class="search-input" id="status-filter" onchange="filterLessons(document.querySelector('[placeholder]').value)" style="width:120px;flex:none;">
+          <option value="">כל הסטטוסים</option>
+          <option value="pending">ממתין</option>
+          <option value="confirmed">אושר</option>
+          <option value="cancelled">בוטל</option>
+        </select>
+      </div>
+      <div class="clients-table">
+        <div style="display:grid;grid-template-columns:1fr 100px 70px 70px 80px 50px;padding:8px 13px;background:var(--surface2);border-bottom:.5px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);">
+          <span>שם</span><span>טלפון</span><span>יום</span><span>תאריך</span><span>שעה</span><span></span>
+        </div>
+        <div id="lessons-body"></div>
+      </div>
     </div>
 
     <!-- STATS -->
@@ -205,7 +228,7 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-title"><span id="modal-title-text">תור חדש</span><button class="modal-close" onclick="closeModal()">×</button></div>
-    <div class="modal-field"><label>שם לקוח</label><input class="modal-input" id="m-name" placeholder="שם מלא"></div>
+    <div class="modal-field"><label>שם תלמיד</label><input class="modal-input" id="m-name" placeholder="שם מלא"></div>
     <div class="modal-field"><label>טלפון</label><input class="modal-input" id="m-phone" placeholder="05X-XXXXXXX" dir="ltr"></div>
     <div class="modal-field"><label>סוג שיעור</label><select class="modal-input" id="m-type"><option>DJ מתחיל</option><option>הפקה מוזיקלית</option><option>מיקסינג מתקדם</option></select></div>
     <div class="modal-field" style="display:flex;gap:7px;">
@@ -219,6 +242,42 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
 <script>
 const API='';
 let allAppts=[],allClients=[],allSchedule=[];
+
+let allLessons=[];
+
+async function loadAllLessons(){
+  const res=await fetch(API+'/api/appointments');
+  allLessons=await res.json();
+  renderLessons(allLessons);
+}
+
+function renderLessons(list){
+  const statusLabel={confirmed:'אושר',pending:'ממתין',cancelled:'בוטל'};
+  const statusColor={confirmed:'var(--pink)',pending:'#ffd166',cancelled:'var(--muted)'};
+  document.getElementById('lessons-body').innerHTML=list.length?list.map(a=>`
+    <div style="display:grid;grid-template-columns:1fr 100px 60px 60px 90px 40px;padding:9px 13px;border-bottom:.5px solid var(--border);font-size:13px;align-items:center;">
+      <span style="font-weight:600">${a.name||'—'}</span>
+      <span style="color:var(--muted);font-size:12px;direction:ltr">${(a.phone||'').replace('+972-','')}</span>
+      <span style="color:var(--muted);font-size:12px">${a.day||'—'}</span>
+      <span style="color:var(--muted);font-size:12px">${a.date||'—'}</span>
+      <span style="font-size:12px;color:${statusColor[a.status]};font-weight:600">${statusLabel[a.status]||''} · ${a.time||''}</span>
+      <span onclick="delLesson('${a._id}')" style="color:#e24b4a;cursor:pointer;font-size:14px;text-align:center;">✕</span>
+    </div>`).join(''):'<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">אין שיעורים עדיין</div>';
+}
+
+function filterLessons(q){
+  const status=document.getElementById('status-filter')?.value||'';
+  let f=allLessons;
+  if(q)f=f.filter(a=>(a.name||'').includes(q)||(a.phone||'').includes(q));
+  if(status)f=f.filter(a=>a.status===status);
+  renderLessons(f);
+}
+
+async function delLesson(id){
+  if(!confirm('למחוק את השיעור?'))return;
+  await fetch(API+'/api/appointments/'+id,{method:'DELETE'});
+  loadAllLessons();loadDiary();loadStats();
+}
 
 async function init(){
   const now=new Date();
@@ -246,13 +305,17 @@ async function loadDiary(){
 
 function renderAppts(containerId,appts){
   const el=document.getElementById(containerId);
-  if(!appts.length){el.innerHTML='<div class="empty-slot" onclick="openModal()">+ הוסף תור</div>';return;}
+  if(!appts.length){el.innerHTML='<div class="empty-slot" onclick="openModal()">+ הוסף שיעור</div>';return;}
   el.innerHTML=appts.map(a=>`
-    <div class="appt ${a.status}" onclick="editAppt('${a._id}','${a.status}')">
+    <div class="appt ${a.status}">
       <span class="appt-time">${a.time}</span>
-      <div class="appt-info"><div class="appt-name">${a.name||a.phone}</div><div class="appt-type">${a.type||''}</div></div>
-      <span class="appt-status s-${a.status}">${a.status==='confirmed'?'אושר':a.status==='pending'?'ממתין':'בוטל'}</span>
-    </div>`).join('')+'<div class="empty-slot" onclick="openModal()">+ הוסף תור</div>';
+      <div class="appt-info">
+        <div class="appt-name">${a.name||a.phone}</div>
+        <div class="appt-type">${a.phone||''}</div>
+      </div>
+      <span class="appt-status s-${a.status}" onclick="cycleStatus('${a._id}','${a.status}')" style="cursor:pointer">${a.status==='confirmed'?'אושר':a.status==='pending'?'ממתין':'בוטל'}</span>
+      <span onclick="deleteAppt('${a._id}')" style="color:#e24b4a;font-size:16px;cursor:pointer;margin-right:6px;padding:2px 6px;">✕</span>
+    </div>`).join('')+'<div class="empty-slot" onclick="openModal()">+ הוסף שיעור</div>';
 }
 
 async function loadClients(){
@@ -344,12 +407,13 @@ function showPage(id,btn){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   btn.classList.add('active');
-  const titles={diary:'יומן',clients:'לקוחות',schedule:'לו"ז שבועי',stats:'סטטיסטיקות'};
-  document.getElementById('page-title').textContent=titles[id];
+  const titles={diary:'יומן',clients:'לקוחות',schedule:'לו"ז שבועי',stats:'סטטיסטיקות',lessons:'כל השיעורים'};
+  document.getElementById('page-title').textContent=titles[id]||id;
   if(id==='stats')loadStats();
   if(id==='clients')loadClients();
   if(id==='schedule')loadScheduleEditor();
   if(id==='diary')loadDiary();
+  if(id==='lessons')loadAllLessons();
 }
 
 function openModal(){document.getElementById('modal').classList.add('open');}
@@ -359,12 +423,20 @@ async function saveAppt(){
   await fetch(API+'/api/appointments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   closeModal();loadDiary();
 }
+async function cycleStatus(id,currentStatus){
+  const next=currentStatus==='pending'?'confirmed':currentStatus==='confirmed'?'cancelled':'pending';
+  await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});
+  loadDiary();
+}
+async function deleteAppt(id){
+  if(!confirm('למחוק את השיעור?'))return;
+  await fetch(API+'/api/appointments/'+id,{method:'DELETE'});
+  loadDiary();loadStats();
+}
 async function editAppt(id,currentStatus){
   const next=currentStatus==='pending'?'confirmed':currentStatus==='confirmed'?'cancelled':'pending';
-  if(confirm('שנה סטטוס ל-'+(next==='confirmed'?'אושר':next==='cancelled'?'בוטל':'ממתין')+'?')){
-    await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});
-    loadDiary();
-  }
+  await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});
+  loadDiary();
 }
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 init();
