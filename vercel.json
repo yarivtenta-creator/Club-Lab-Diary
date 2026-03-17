@@ -9,7 +9,7 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/server.js" },
     { "src": "/admin", "dest": "/server.js" },
-    { "src": "/admin/(.*)", "dest": "/server.js" },
+    { "src": "/admin/", "dest": "/server.js" },
     { "src": "/(.*)", "dest": "/server.js" }
   ],
   "crons": [
