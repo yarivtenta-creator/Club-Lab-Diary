@@ -471,12 +471,17 @@ const DEFAULT_TEMPLATE={
     {day:'שלישי',morning:['10:30','12:30'],evening:['20:00','22:00'],open:true},
     {day:'רביעי',morning:['10:30','12:30'],evening:['20:00','22:00'],open:true},
     {day:'חמישי',morning:['10:30','12:30'],evening:[],open:true},
+    {day:'שישי', morning:[],evening:[],open:false},
+    {day:'שבת',  morning:[],evening:[],open:false},
   ]
 };
 
 function loadTemplatesFromStorage(){
   try{templates=JSON.parse(localStorage.getItem('cl_templates'))||{};}catch(e){templates={};}
-  if(!templates['Ben Default'])templates['Ben Default']=DEFAULT_TEMPLATE;
+  // Reset Ben Default if it doesn't have all 7 days
+  if(!templates['Ben Default']||templates['Ben Default'].days.length<7){
+    templates['Ben Default']=DEFAULT_TEMPLATE;
+  }
   saveTemplatesToStorage();
   renderTemplatesBar();
   if(!activeTemplate)loadTemplate('Ben Default');
