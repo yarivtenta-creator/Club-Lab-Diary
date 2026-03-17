@@ -242,8 +242,14 @@ function initPhone(){
 }
 
 async function loadSchedule(){
+  document.getElementById('week-label').textContent='טוען...';
+  document.getElementById('schedule-rows').innerHTML='';
+  document.getElementById('offline-msg')&&document.getElementById('offline-msg').remove();
   try{
-    const [sch,appts]=await Promise.all([fetch('/api/schedule').then(r=>r.json()),fetch('/api/appointments').then(r=>r.json())]);
+    const [sch,appts]=await Promise.all([
+      fetch('/api/schedule',{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
+      fetch('/api/appointments',{signal:AbortSignal.timeout(8000)}).then(r=>r.json())
+    ]);
     const booked=appts.filter(a=>a.status!=='cancelled').map(a=>a.date+'_'+a.time);
     const dates=weekDates();
     document.getElementById('week-label').textContent=fd(dates[0])+' – '+fd(dates[4]);
@@ -264,8 +270,14 @@ async function loadSchedule(){
       });
     });
   }catch(e){
-    document.getElementById('week-label').textContent='טוען מחדש...';
-    setTimeout(loadSchedule, 2000);
+    document.getElementById('week-label').textContent='';
+    const rows=document.getElementById('schedule-rows');
+    rows.innerHTML=`<div id="offline-msg" style="background:rgba(255,45,138,0.08);border:1px solid rgba(255,45,138,0.3);border-radius:12px;padding:20px 16px;text-align:center;margin:8px 0;">
+      <div style="font-size:22px;margin-bottom:8px;">⚡</div>
+      <div style="font-size:15px;font-weight:700;color:#f5f5f5;margin-bottom:6px;">המערכת עמוסה כרגע</div>
+      <div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">השרת עמוס — אנא המתן מספר שניות ונסה שוב</div>
+      <button onclick="loadSchedule()" style="background:#ff2d8a;border:none;border-radius:10px;color:#fff;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;padding:11px 24px;cursor:pointer;">נסה שוב ←</button>
+    </div>`;
   }
 }
 
