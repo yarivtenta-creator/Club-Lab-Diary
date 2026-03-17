@@ -23,6 +23,9 @@ app.use('/api/schedule', require('./api/schedule'));
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/admin/index.html'));
 });
+app.get('/admin/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/admin/index.html'));
+});
 
 // Landing page
 app.get('/', (req, res) => {
