@@ -252,7 +252,7 @@ async function loadSchedule(){
     ]);
     const booked=appts.filter(a=>a.status!=='cancelled').map(a=>a.date+'_'+a.time);
     const dates=weekDates();
-    document.getElementById('week-label').textContent=fd(dates[0])+' – '+fd(dates[4]);
+    document.getElementById('week-label').textContent=fd(dates[0])+' – '+fd(dates[6]);
     const rows=document.getElementById('schedule-rows');rows.innerHTML='';
     sch.filter(d=>d.open).forEach((day,i)=>{
       const ds=fd(dates[i]);
@@ -283,7 +283,7 @@ async function loadSchedule(){
 
 function weekDates(){
   const t=new Date(),s=new Date(t);s.setDate(t.getDate()-t.getDay());
-  return Array.from({length:5},(_,i)=>{const d=new Date(s);d.setDate(s.getDate()+i);return d;});
+  return Array.from({length:7},(_,i)=>{const d=new Date(s);d.setDate(s.getDate()+i);return d;});
 }
 function fd(d){return d.getDate()+'.'+(d.getMonth()+1);}
 
