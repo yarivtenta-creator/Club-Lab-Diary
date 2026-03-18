@@ -366,7 +366,7 @@ async function init(){
   document.getElementById('diary-date').textContent=ds;
   document.getElementById('diary-date2').textContent=ds;
   loadTemplatesFromStorage();
-  loadContentFromStorage();
+  await loadContentFromStorage();
   await Promise.all([loadDiary(),loadClients(),loadStats()]);
 }
 
@@ -569,23 +569,34 @@ function deleteTemplate(){
 }
 
 // ── NEWS & TIPS ──
-function loadContentFromStorage(){
-  try{newsItems=JSON.parse(localStorage.getItem('cl_news'))||[];}catch(e){newsItems=[];}
-  try{tipsItems=JSON.parse(localStorage.getItem('cl_tips'))||[];}catch(e){tipsItems=[];}
-  if(!newsItems.length)newsItems=[
-    {id:1,date:'17 מרץ 2026',title:'לו"ז שבועי עלה לאוויר',body:'שעות הבוקר והערב זמינות לקביעה. ימי ראשון–חמישי פתוחים.'},
-    {id:2,date:'10 מרץ 2026',title:'שיפורים במערכת הקביעה',body:'אישורים ישירות לוואטסאפ תוך שניות מסיום הקביעה.'},
-  ];
-  if(!tipsItems.length)tipsItems=[
-    {id:1,num:'01',title:'EQ לפני Compressor',body:'תמיד תנקה את הצליל עם EQ לפני שאתה מדחס — Compressor מגביר גם את הבעיות.'},
-    {id:2,num:'02',title:'Gain Staging נכון',body:'שמור על רמות כניסה בין -18 ל-12 dBFS. Headroom נכון שווה מיקס נקי.'},
-    {id:3,num:'03',title:'מעברים חלקים',body:'תרגל מעבר בין שירים ב-phrase של 8 beats. תן לאנרגיה לעלות לאט.'},
-  ];
+async function loadContentFromStorage(){
+  try{
+    const [news,tips]=await Promise.all([
+      fetch(API+'/api/content/news').then(r=>r.json()),
+      fetch(API+'/api/content/tips').then(r=>r.json())
+    ]);
+    newsItems=news;
+    tipsItems=tips;
+  }catch(e){
+    newsItems=[
+      {id:1,date:'17 מרץ 2026',title:'לו"ז שבועי עלה לאוויר',body:'שעות הבוקר והערב זמינות לקביעה. ימי ראשון–חמישי פתוחים.'},
+      {id:2,date:'10 מרץ 2026',title:'שיפורים במערכת הקביעה',body:'אישורים ישירות לוואטסאפ תוך שניות מסיום הקביעה.'},
+    ];
+    tipsItems=[
+      {id:1,num:'01',title:'EQ לפני Compressor',body:'תמיד תנקה את הצליל עם EQ לפני שאתה מדחס.'},
+      {id:2,num:'02',title:'Gain Staging נכון',body:'שמור על רמות כניסה בין -18 ל-12 dBFS.'},
+      {id:3,num:'03',title:'מעברים חלקים',body:'תרגל מעבר בין שירים ב-phrase של 8 beats.'},
+    ];
+  }
   renderNews();renderTips();
 }
-function saveContent(){
-  localStorage.setItem('cl_news',JSON.stringify(newsItems));
-  localStorage.setItem('cl_tips',JSON.stringify(tipsItems));
+async function saveContent(){
+  try{
+    await Promise.all([
+      fetch(API+'/api/content/news',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(newsItems)}),
+      fetch(API+'/api/content/tips',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(tipsItems)})
+    ]);
+  }catch(e){console.error('save content error',e);}
 }
 
 function renderNews(){
