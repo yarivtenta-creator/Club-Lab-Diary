@@ -622,40 +622,40 @@ function renderTips(){
 }
 
 function showAddNews(){document.getElementById('add-news-form').style.display='block';}
-function addNewsItem(){
+async function addNewsItem(){
   const title=document.getElementById('news-title-input').value.trim();
   const body=document.getElementById('news-body-input').value.trim();
   if(!title)return;
   const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
   newsItems.unshift({id:Date.now(),date:today,title,body});
-  saveContent();renderNews();
+  await saveContent();renderNews();
   document.getElementById('add-news-form').style.display='none';
   document.getElementById('news-title-input').value='';
   document.getElementById('news-body-input').value='';
 }
-function deleteNews(id){
+async function deleteNews(id){
   if(!confirm('למחוק?'))return;
   newsItems=newsItems.filter(n=>n.id!==id);
-  saveContent();renderNews();
+  await saveContent();renderNews();
 }
 
 function showAddTip(){document.getElementById('add-tip-form').style.display='block';}
-function addTipItem(){
+async function addTipItem(){
   const title=document.getElementById('tip-title-input').value.trim();
   const body=document.getElementById('tip-body-input').value.trim();
   if(!title)return;
   const num=String(tipsItems.length+1).padStart(2,'0');
   tipsItems.push({id:Date.now(),num,title,body});
-  saveContent();renderTips();
+  await saveContent();renderTips();
   document.getElementById('add-tip-form').style.display='none';
   document.getElementById('tip-title-input').value='';
   document.getElementById('tip-body-input').value='';
 }
-function deleteTip(id){
+async function deleteTip(id){
   if(!confirm('למחוק?'))return;
   tipsItems=tipsItems.filter(t=>t.id!==id);
   tipsItems.forEach((t,i)=>t.num=String(i+1).padStart(2,'0'));
-  saveContent();renderTips();
+  await saveContent();renderTips();
 }
 
 // ── STATS ──
