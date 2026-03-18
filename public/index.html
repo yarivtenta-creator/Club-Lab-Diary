@@ -59,7 +59,7 @@ h1{font-size:clamp(28px,9vw,48px);font-weight:900;line-height:1.1;margin-bottom:
 .btn-secondary{background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Heebo',sans-serif;font-size:13px;padding:10px 16px;cursor:pointer;margin-top:9px;width:100%;-webkit-appearance:none;}
 .schedule-days{display:flex;flex-direction:column;gap:10px;margin-bottom:13px;}
 .day-row{display:flex;align-items:flex-start;gap:8px;}
-.day-label{min-width:40px;font-size:12px;font-weight:700;color:var(--muted);padding-top:7px;}
+.day-label{min-width:52px;font-size:12px;font-weight:700;color:var(--muted);padding-top:4px;}
 .slots{display:flex;flex-wrap:wrap;gap:6px;flex:1;}
 .slot{padding:7px 11px;background:var(--surface2);border:1px solid rgba(255,45,138,.2);border-radius:8px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;direction:ltr;-webkit-tap-highlight-color:transparent;}
 .slot:active{transform:scale(0.95);}
@@ -268,7 +268,7 @@ async function loadSchedule(){
       const dayName=dayNames[d.getDay()];
       const ds=d.getDate()+'.'+(d.getMonth()+1);
       const row=document.createElement('div');row.className='day-row';
-      row.innerHTML='<span class="day-label">'+dayName+'</span><div class="slots"></div>';
+      row.innerHTML='<span class="day-label"><span style="display:block;font-weight:700;">'+dayName+'</span><span style="font-size:10px;color:var(--muted);font-weight:400;">'+ds+'</span></span><div class="slots"></div>';
       rows.appendChild(row);
       const sd=row.querySelector('.slots');
       (day.slots||[]).forEach(t=>{
