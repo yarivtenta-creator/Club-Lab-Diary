@@ -255,15 +255,48 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
 
     <!-- SCHEDULE TEMPLATES -->
     <div class="page" id="page-schedule">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">בחר תבנית קיימת או צור חדשה — לאחר עריכה לחץ "פרסם"</div>
-      <div class="templates-bar" id="templates-bar"></div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
-        <input class="tpl-name-input" id="tpl-name-input" placeholder="שם תבנית חדשה...">
-        <button class="btn-outline" onclick="saveAsTemplate()">💾 שמור כתבנית</button>
-        <button class="btn-save" onclick="publishSchedule()">🚀 פרסם לאתר</button>
-        <button class="btn-outline" onclick="deleteTemplate()" style="color:#e24b4a;border-color:#e24b4a;">🗑 מחק תבנית</button>
+      <!-- Month navigation -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="btn-outline" onclick="prevMonth()" style="padding:7px 14px;">→ חודש קודם</button>
+        <span style="font-size:16px;font-weight:700;" id="month-label"></span>
+        <button class="btn-outline" onclick="nextMonth()" style="padding:7px 14px;">← חודש הבא</button>
+        <button class="btn-save" onclick="publishMonth()" style="margin-right:auto;">🚀 פרסם חודש לאתר</button>
       </div>
-      <div class="week-editor" id="week-editor"></div>
+
+      <!-- Default slots selector -->
+      <div style="background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:700;color:var(--muted);">שעות ברירת מחדל לימים פתוחים:</span>
+        <div id="default-slots-wrap" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;"></div>
+        <button class="add-slot-btn" onclick="addDefaultSlot()">+ שעה</button>
+      </div>
+
+      <!-- Calendar grid -->
+      <div style="background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);border-bottom:.5px solid var(--border);">
+          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">א</div>
+          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">ב</div>
+          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">ג</div>
+          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">ד</div>
+          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">ה</div>
+          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:#ff2d8a;">ו</div>
+          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:#ff2d8a;">ש</div>
+        </div>
+        <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);"></div>
+      </div>
+
+      <!-- Day editor -->
+      <div id="day-editor" style="display:none;background:var(--surface);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:16px;margin-top:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <span style="font-size:14px;font-weight:700;" id="day-editor-title"></span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:var(--muted);" id="day-open-label">סגור</span>
+            <button class="toggle" id="day-toggle" onclick="toggleDayOpen()"></button>
+          </div>
+        </div>
+        <div id="day-slots-wrap" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+        <button class="add-slot-btn" onclick="addDaySlot()">+ שעה</button>
+        <button class="btn-save" style="margin-right:8px;font-size:12px;padding:7px 14px;" onclick="saveDayAndClose()">שמור יום ✓</button>
+      </div>
     </div>
 
     <!-- NEWS & TIPS EDITOR -->
@@ -365,7 +398,7 @@ async function init(){
   const ds=now.getDate()+'.'+(now.getMonth()+1);
   document.getElementById('diary-date').textContent=ds;
   document.getElementById('diary-date2').textContent=ds;
-  loadTemplatesFromStorage();
+  loadMonth();
   await loadContentFromStorage();
   await Promise.all([loadDiary(),loadClients(),loadStats()]);
 }
@@ -462,111 +495,146 @@ function renderClients(list){
 }
 function filterClients(q){renderClients(allClients.filter(c=>(c.name||'').includes(q)||(c.phone||'').includes(q)));}
 
-// ── SCHEDULE TEMPLATES ──
-const DEFAULT_TEMPLATE={
-  name:'Ben Default',
-  days:[
-    {day:'ראשון',morning:['10:30','12:30'],evening:['20:30','22:30'],open:true},
-    {day:'שני',  morning:['10:30','12:30'],evening:['20:00','22:00'],open:true},
-    {day:'שלישי',morning:['10:30','12:30'],evening:['20:00','22:00'],open:true},
-    {day:'רביעי',morning:['10:30','12:30'],evening:['20:00','22:00'],open:true},
-    {day:'חמישי',morning:['10:30','12:30'],evening:[],open:true},
-    {day:'שישי', morning:[],evening:[],open:false},
-    {day:'שבת',  morning:[],evening:[],open:false},
-  ]
-};
+// ── MONTHLY CALENDAR ──
+const DEFAULT_SLOTS=['10:30','12:30','20:00','22:00'];
+let currentYear=new Date().getFullYear();
+let currentMonth=new Date().getMonth()+1;
+let monthData={};
+let defaultSlots=[...DEFAULT_SLOTS];
+let editingDate=null;
 
-function loadTemplatesFromStorage(){
-  try{templates=JSON.parse(localStorage.getItem('cl_templates'))||{};}catch(e){templates={};}
-  // Reset Ben Default if it doesn't have all 7 days
-  if(!templates['Ben Default']||templates['Ben Default'].days.length<7){
-    templates['Ben Default']=DEFAULT_TEMPLATE;
-  }
-  saveTemplatesToStorage();
-  renderTemplatesBar();
-  if(!activeTemplate)loadTemplate('Ben Default');
+function prevMonth(){
+  currentMonth--;
+  if(currentMonth<1){currentMonth=12;currentYear--;}
+  loadMonth();
 }
-function saveTemplatesToStorage(){localStorage.setItem('cl_templates',JSON.stringify(templates));}
-
-function renderTemplatesBar(){
-  const bar=document.getElementById('templates-bar');
-  bar.innerHTML=Object.keys(templates).map(name=>`
-    <button class="tpl-btn ${activeTemplate===name?'active-tpl':''}" onclick="loadTemplate('${name}')">${name}</button>
-  `).join('');
+function nextMonth(){
+  currentMonth++;
+  if(currentMonth>12){currentMonth=1;currentYear++;}
+  loadMonth();
 }
 
-function loadTemplate(name){
-  activeTemplate=name;
-  allSchedule=JSON.parse(JSON.stringify(templates[name].days));
-  document.getElementById('tpl-name-input').value=name;
-  renderTemplatesBar();
-  renderWeekEditor();
+async function loadMonth(){
+  const label=new Date(currentYear,currentMonth-1,1).toLocaleDateString('he-IL',{month:'long',year:'numeric'});
+  document.getElementById('month-label').textContent=label;
+  try{
+    const res=await fetch(API+'/api/monthly/'+currentYear+'/'+currentMonth);
+    const days=await res.json();
+    monthData={};
+    days.forEach(d=>monthData[d.date]=d);
+  }catch(e){monthData={};}
+  renderCalendar();
+  renderDefaultSlots();
 }
 
-function renderWeekEditor(){
-  const ed=document.getElementById('week-editor');
-  ed.innerHTML=allSchedule.map((day,i)=>`
-    <div class="day-editor-row">
-      <span class="day-editor-name">${day.day}</span>
-      <div class="slots-edit" id="se-${i}">
-        ${(day.morning||[]).map(t=>`<span class="slot-tag slot-morning" data-day="${i}" data-time="${t}" data-type="morning">${t}<span class="sx" onclick="removeSlot(${i},'${t}','morning')">✕</span></span>`).join('')}
-        ${(day.evening||[]).map(t=>`<span class="slot-tag slot-evening" data-day="${i}" data-time="${t}" data-type="evening">${t}<span class="sx" onclick="removeSlot(${i},'${t}','evening')">✕</span></span>`).join('')}
-        <button class="add-slot-btn" onclick="addSlot(${i})">+ שעה</button>
-      </div>
-      <div class="toggle-wrap">
-        <button class="toggle ${day.open?'on':''}" id="tog-${i}" onclick="toggleDay(${i},this)"></button>
-        <span style="font-size:11px;color:var(--muted)" id="tog-lbl-${i}">${day.open?'פתוח':'סגור'}</span>
-      </div>
-    </div>`).join('');
+function renderDefaultSlots(){
+  document.getElementById('default-slots-wrap').innerHTML=defaultSlots.map(t=>`
+    <span class="slot-tag slot-${parseInt(t)<18?'morning':'evening'}" style="cursor:pointer">
+      ${t}<span class="sx" onclick="removeDefaultSlot('${t}')"> ✕</span>
+    </span>`).join('');
 }
 
-function toggleDay(i,btn){
-  btn.classList.toggle('on');
-  allSchedule[i].open=btn.classList.contains('on');
-  document.getElementById('tog-lbl-'+i).textContent=allSchedule[i].open?'פתוח':'סגור';
-}
-
-function addSlot(i){
+function addDefaultSlot(){
   const t=prompt('הכנס שעה (לדוגמה 14:00):');
   if(!t||!/^\d{1,2}:\d{2}$/.test(t))return;
-  const isEv=parseInt(t)>=18;
-  if(isEv)allSchedule[i].evening=[...(allSchedule[i].evening||[]),t];
-  else allSchedule[i].morning=[...(allSchedule[i].morning||[]),t];
-  renderWeekEditor();
+  if(!defaultSlots.includes(t))defaultSlots.push(t);
+  defaultSlots.sort();
+  renderDefaultSlots();
+}
+function removeDefaultSlot(t){
+  defaultSlots=defaultSlots.filter(s=>s!==t);
+  renderDefaultSlots();
 }
 
-function removeSlot(i,t,type){
-  allSchedule[i][type]=allSchedule[i][type].filter(x=>x!==t);
-  renderWeekEditor();
+function renderCalendar(){
+  const grid=document.getElementById('cal-grid');
+  const firstDay=new Date(currentYear,currentMonth-1,1).getDay();
+  const daysInMonth=new Date(currentYear,currentMonth,0).getDate();
+  const today=new Date().toISOString().split('T')[0];
+  let html='';
+  for(let i=0;i<firstDay;i++) html+='<div style="min-height:60px;border:.5px solid var(--border);opacity:.3;"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const date=`${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayData=monthData[date];
+    const isOpen=dayData?.open||false;
+    const slots=dayData?.slots||[];
+    const isToday=date===today;
+    const isPast=date<today;
+    html+=`<div onclick="openDayEditor('${date}')" style="min-height:60px;border:.5px solid var(--border);padding:5px;cursor:pointer;transition:background .15s;background:${isOpen?'rgba(255,45,138,.06)':isPast?'rgba(0,0,0,.03)':'var(--surface)'};${isToday?'border-color:var(--pink);':''}">
+      <div style="font-size:11px;font-weight:700;color:${isToday?'var(--pink)':isPast?'var(--muted)':'var(--text)'};">${d}</div>
+      ${isOpen?`<div style="margin-top:3px;"><span style="font-size:9px;background:var(--pink);color:#fff;border-radius:4px;padding:1px 5px;">פתוח</span></div><div style="font-size:9px;color:var(--muted);margin-top:2px;">${slots.length} שעות</div>`:'<div style="font-size:9px;color:var(--muted);margin-top:3px;">סגור</div>'}
+    </div>`;
+  }
+  grid.innerHTML=html;
 }
 
-function saveAsTemplate(){
-  const name=document.getElementById('tpl-name-input').value.trim();
-  if(!name){alert('הכנס שם לתבנית');return;}
-  templates[name]={name,days:JSON.parse(JSON.stringify(allSchedule))};
-  activeTemplate=name;
-  saveTemplatesToStorage();
-  renderTemplatesBar();
-  alert('התבנית "'+name+'" נשמרה! ✓');
+function openDayEditor(date){
+  editingDate=date;
+  const dayData=monthData[date]||{date,open:false,slots:[]};
+  const d=new Date(date+'T12:00:00');
+  document.getElementById('day-editor-title').textContent=d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
+  const tog=document.getElementById('day-toggle');
+  tog.classList.toggle('on',dayData.open);
+  document.getElementById('day-open-label').textContent=dayData.open?'פתוח':'סגור';
+  if(!dayData.slots||!dayData.slots.length) dayData.slots=[...defaultSlots];
+  renderDaySlots(dayData.slots);
+  document.getElementById('day-editor').style.display='block';
+  document.getElementById('day-editor').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-async function publishSchedule(){
-  if(!confirm('לפרסם לוח זמנים זה לאתר?'))return;
+function renderDaySlots(slots){
+  document.getElementById('day-slots-wrap').innerHTML=slots.map(t=>`
+    <span class="slot-tag slot-${parseInt(t)<18?'morning':'evening'}">
+      ${t}<span class="sx" onclick="removeDaySlot('${t}')"> ✕</span>
+    </span>`).join('');
+}
+
+function toggleDayOpen(){
+  const tog=document.getElementById('day-toggle');
+  tog.classList.toggle('on');
+  document.getElementById('day-open-label').textContent=tog.classList.contains('on')?'פתוח':'סגור';
+}
+
+function addDaySlot(){
+  const t=prompt('הכנס שעה (לדוגמה 14:00):');
+  if(!t||!/^\d{1,2}:\d{2}$/.test(t))return;
+  const dayData=monthData[editingDate]||{date:editingDate,open:false,slots:[]};
+  if(!dayData.slots.includes(t))dayData.slots.push(t);
+  dayData.slots.sort();
+  monthData[editingDate]=dayData;
+  renderDaySlots(dayData.slots);
+}
+
+function removeDaySlot(t){
+  const dayData=monthData[editingDate];
+  if(!dayData)return;
+  dayData.slots=dayData.slots.filter(s=>s!==t);
+  renderDaySlots(dayData.slots);
+}
+
+async function saveDayAndClose(){
+  if(!editingDate)return;
+  const tog=document.getElementById('day-toggle');
+  const slots=Array.from(document.querySelectorAll('#day-slots-wrap .slot-tag')).map(el=>el.textContent.trim().replace('✕','').trim());
+  const dayData={date:editingDate,open:tog.classList.contains('on'),slots};
+  monthData[editingDate]=dayData;
   try{
-    await Promise.all(allSchedule.map(day=>
-      fetch(API+'/api/schedule/'+encodeURIComponent(day.day),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(day)})
-    ));
-    alert('הלוח פורסם בהצלחה! 🚀');
+    await fetch(API+'/api/monthly/day/'+editingDate,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(dayData)});
+  }catch(e){console.error(e);}
+  document.getElementById('day-editor').style.display='none';
+  editingDate=null;
+  renderCalendar();
+}
+
+async function publishMonth(){
+  const days=Object.values(monthData);
+  if(!days.length){alert('אין שינויים לפרסם');return;}
+  try{
+    await fetch(API+'/api/monthly/month',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(days)});
+    alert('הלוח החודשי פורסם! 🚀');
   }catch(e){alert('שגיאה בפרסום');}
 }
 
-function deleteTemplate(){
-  if(activeTemplate==='Ben Default'){alert('לא ניתן למחוק את התבנית הראשית');return;}
-  if(!confirm('למחוק תבנית "'+activeTemplate+'"?'))return;
-  delete templates[activeTemplate];
-  saveTemplatesToStorage();
-  loadTemplate('Ben Default');
-}
 
 // ── NEWS & TIPS ──
 async function loadContentFromStorage(){
@@ -701,13 +769,14 @@ function showPage(id,btn){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   btn.classList.add('active');
-  const titles={diary:'יומן',clients:'תלמידים',schedule:'לו"ז ותבניות',stats:'סטטיסטיקות',lessons:'כל השיעורים',content:'חדשות וטיפים'};
+  const titles={diary:'יומן',clients:'תלמידים',schedule:'לוח חודשי',stats:'סטטיסטיקות',lessons:'כל השיעורים',content:'חדשות וטיפים'};
   document.getElementById('page-title').textContent=titles[id]||id;
   document.getElementById('top-add-btn').style.display=id==='diary'?'block':'none';
   if(id==='stats')loadStats();
   if(id==='clients')loadClients();
   if(id==='diary')loadDiary();
   if(id==='lessons')loadAllLessons();
+  if(id==='schedule')loadMonth();
 }
 
 // ── MODAL ──
