@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>The Club Lab — קביעת תור</title>
+<title>The Club Lab — קביעת שיעור</title>
+<meta property="og:title" content="The Club Lab — קביעת שיעור">
+<meta property="og:description" content="קבע שיעור DJ או הפקה מוזיקלית תוך שניות">
+<meta property="og:image" content="/images/logo.jpg">
+<meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -245,7 +249,7 @@ async function loadSchedule(){
     const today=new Date();
     const from=today.toISOString().split('T')[0];
     const futureDate=new Date(today);
-    futureDate.setDate(today.getDate()+14);
+    futureDate.setDate(today.getDate()+28);
     const to=futureDate.toISOString().split('T')[0];
     const [available,appts]=await Promise.all([
       fetch('/api/monthly/available/'+from+'/'+to,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
