@@ -523,6 +523,16 @@ async function loadMonth(){
     monthData={};
     days.forEach(d=>monthData[d.date]=d);
   }catch(e){monthData={};}
+  // Auto-populate defaults for all days in month
+  const daysInMonth=new Date(currentYear,currentMonth,0).getDate();
+  for(let d=1;d<=daysInMonth;d++){
+    const date=`${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(!monthData[date]){
+      const dayOfWeek=new Date(date+'T12:00:00').getDay();
+      const isSunToThu=dayOfWeek>=0&&dayOfWeek<=4;
+      monthData[date]={date,open:isSunToThu,slots:isSunToThu?[...defaultSlots]:[]};
+    }
+  }
   renderCalendar();
   renderDefaultSlots();
 }
