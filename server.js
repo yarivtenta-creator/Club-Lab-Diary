@@ -17,6 +17,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use('/api/appointments', require('./api/appointments'));
 app.use('/api/clients', require('./api/clients'));
 app.use('/api/schedule', require('./api/schedule'));
+app.use('/api/content', require('./api/content'));
 
 // Admin page - before static middleware
 app.get('/admin', (req, res) => {
