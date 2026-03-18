@@ -51,8 +51,16 @@ router.delete('/:id', async (req, res) => {
 router.put('/tips', async (req, res) => {
   try {
     await Content.deleteMany({ type: 'tip' });
-    const items = req.body.map((item, i) => ({ ...item, type: 'tip', order: i }));
-    await Content.insertMany(items);
+    if(req.body && req.body.length > 0) {
+      const items = req.body.map((item, i) => ({
+        type: 'tip',
+        title: item.title||'',
+        body: item.body||'',
+        num: item.num||String(i+1).padStart(2,'0'),
+        order: i
+      }));
+      await Content.insertMany(items);
+    }
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -61,7 +69,15 @@ router.put('/tips', async (req, res) => {
 router.put('/news', async (req, res) => {
   try {
     await Content.deleteMany({ type: 'news' });
-    await Content.insertMany(req.body.map(item => ({ ...item, type: 'news' })));
+    if(req.body && req.body.length > 0) {
+      const items = req.body.map(item => ({
+        type: 'news',
+        title: item.title||'',
+        body: item.body||'',
+        date: item.date||''
+      }));
+      await Content.insertMany(items);
+    }
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
