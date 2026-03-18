@@ -251,10 +251,15 @@ async function loadSchedule(){
     const futureDate=new Date(today);
     futureDate.setDate(today.getDate()+28);
     const to=futureDate.toISOString().split('T')[0];
-    const [available,appts]=await Promise.all([
+    const available=availableRaw.filter(day=>{
+    const [availableRaw,appts]=await Promise.all([
       fetch('/api/monthly/available/'+from+'/'+to,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
       fetch('/api/appointments',{signal:AbortSignal.timeout(8000)}).then(r=>r.json())
     ]);
+    const available=availableRaw.filter(day=>{
+      const dow=new Date(day.date+'T12:00:00').getDay();
+      return dow!==5&&dow!==6;
+    });
     const booked=appts.filter(a=>a.status!=='cancelled').map(a=>a.date+'_'+a.time);
     if(!available.length){
       document.getElementById('week-label').textContent='אין זמינות כרגע';
