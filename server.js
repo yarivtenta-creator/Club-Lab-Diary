@@ -18,6 +18,7 @@ app.use('/api/appointments', require('./api/appointments'));
 app.use('/api/clients', require('./api/clients'));
 app.use('/api/schedule', require('./api/schedule'));
 app.use('/api/content', require('./api/content'));
+app.use('/api/monthly', require('./api/monthly'));
 
 // Admin page - before static middleware
 app.get('/admin', (req, res) => {
