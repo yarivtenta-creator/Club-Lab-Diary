@@ -336,29 +336,33 @@ document.querySelectorAll('.nav-links a').forEach(a=>{
 });
 async function loadContent(){
   try{
-    const [news,tips]=await Promise.all([
-      fetch('/api/content/news').then(r=>r.json()),
-      fetch('/api/content/tips').then(r=>r.json())
+    const [newsRes,tipsRes]=await Promise.all([
+      fetch('/api/content/news'),
+      fetch('/api/content/tips')
     ]);
-    // Render news
+    const news=newsRes.ok?await newsRes.json():[];
+    const tips=tipsRes.ok?await tipsRes.json():[];
     const ng=document.getElementById('news-grid');
     const colors=['#ff2d8a','#888','#6ee7ff'];
-    ng.innerHTML=news.slice(0,3).map((n,i)=>`
-      <div class="news-card">
-        <div class="news-dot" style="background:${colors[i%3]}"></div>
-        <div><div class="news-date">${n.date||''}</div>
-          <div class="news-title">${n.title}</div>
-          <div class="news-body">${n.body||''}</div>
-        </div>
-      </div>`).join('');
-    // Render tips
+    if(news.length){
+      ng.innerHTML=news.slice(0,3).map((n,i)=>`
+        <div class="news-card">
+          <div class="news-dot" style="background:${colors[i%3]}"></div>
+          <div><div class="news-date">${n.date||''}</div>
+            <div class="news-title">${n.title}</div>
+            <div class="news-body">${n.body||''}</div>
+          </div>
+        </div>`).join('');
+    }else{ng.innerHTML='';}
     const tg=document.getElementById('tips-grid');
-    tg.innerHTML=tips.slice(0,3).map((t,i)=>`
-      <div class="tip-card">
-        <div class="tip-num">טיפ #${t.num||String(i+1).padStart(2,'0')}</div>
-        <div class="tip-title">${t.title}</div>
-        <div class="tip-body">${t.body||''}</div>
-      </div>`).join('');
+    if(tips.length){
+      tg.innerHTML=tips.slice(0,3).map((t,i)=>`
+        <div class="tip-card">
+          <div class="tip-num">טיפ #${t.num||String(i+1).padStart(2,'0')}</div>
+          <div class="tip-title">${t.title}</div>
+          <div class="tip-body">${t.body||''}</div>
+        </div>`).join('');
+    }else{tg.innerHTML='';}
   }catch(e){console.error('content error',e);}
 }
 initPhone();
