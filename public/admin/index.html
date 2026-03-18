@@ -555,9 +555,12 @@ function renderCalendar(){
   for(let i=0;i<firstDay;i++) html+='<div style="min-height:60px;border:.5px solid var(--border);opacity:.3;"></div>';
   for(let d=1;d<=daysInMonth;d++){
     const date=`${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayData=monthData[date];
-    const isOpen=dayData?.open||false;
-    const slots=dayData?.slots||[];
+    const dayOfWeek=new Date(date+'T12:00:00').getDay();
+    const isSunToThu=dayOfWeek>=0&&dayOfWeek<=4;
+    // Use DB data if exists, otherwise default open Sun-Thu
+    const dayData=monthData[date]||{date,open:isSunToThu,slots:isSunToThu?[...defaultSlots]:[]};
+    const isOpen=dayData.open;
+    const slots=dayData.slots||[];
     const isToday=date===today;
     const isPast=date<today;
     html+=`<div onclick="openDayEditor('${date}')" style="min-height:60px;border:.5px solid var(--border);padding:5px;cursor:pointer;transition:background .15s;background:${isOpen?'rgba(255,45,138,.06)':isPast?'rgba(0,0,0,.03)':'var(--surface)'};${isToday?'border-color:var(--pink);':''}">
@@ -570,7 +573,10 @@ function renderCalendar(){
 
 function openDayEditor(date){
   editingDate=date;
-  const dayData=monthData[date]||{date,open:false,slots:[]};
+  const dayOfWeek=new Date(date+'T12:00:00').getDay();
+  const isSunToThu=dayOfWeek>=0&&dayOfWeek<=4;
+  const dayData=monthData[date]||{date,open:isSunToThu,slots:isSunToThu?[...defaultSlots]:[]};
+  if(!monthData[date]) monthData[date]=dayData;
   const d=new Date(date+'T12:00:00');
   document.getElementById('day-editor-title').textContent=d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
   const tog=document.getElementById('day-toggle');
@@ -672,7 +678,7 @@ function renderNews(){
     <div class="content-card">
       <div class="content-card-head">
         <div><div class="item-title">${n.title}</div><div class="item-body" style="margin-top:3px">${n.date}</div></div>
-        <button class="item-del" onclick="deleteNews(${n.id})">✕</button>
+        <button class="item-del" onclick="deleteNews('${n._id||n.id}')">✕</button>
       </div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6">${n.body}</div>
     </div>`).join('')||'<div style="color:var(--muted);font-size:13px;padding:12px">אין חדשות עדיין</div>';
@@ -683,7 +689,7 @@ function renderTips(){
     <div class="content-card">
       <div class="content-card-head">
         <div><div style="font-size:11px;font-weight:700;color:#ffd166;margin-bottom:3px">טיפ #${t.num}</div><div class="item-title">${t.title}</div></div>
-        <button class="item-del" onclick="deleteTip(${t.id})">✕</button>
+        <button class="item-del" onclick="deleteTip('${t._id||t.id}')">✕</button>
       </div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6">${t.body}</div>
     </div>`).join('')||'<div style="color:var(--muted);font-size:13px;padding:12px">אין טיפים עדיין</div>';
@@ -695,16 +701,23 @@ async function addNewsItem(){
   const body=document.getElementById('news-body-input').value.trim();
   if(!title)return;
   const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
-  newsItems.unshift({id:Date.now(),date:today,title,body});
-  await saveContent();renderNews();
+  try{
+    const res=await fetch(API+'/api/content',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'news',title,body,date:today})});
+    const item=await res.json();
+    newsItems.unshift(item);
+    renderNews();
+  }catch(e){console.error(e);}
   document.getElementById('add-news-form').style.display='none';
   document.getElementById('news-title-input').value='';
   document.getElementById('news-body-input').value='';
 }
 async function deleteNews(id){
   if(!confirm('למחוק?'))return;
-  newsItems=newsItems.filter(n=>n.id!==id);
-  await saveContent();renderNews();
+  try{
+    await fetch(API+'/api/content/'+id,{method:'DELETE'});
+    newsItems=newsItems.filter(n=>(n._id||n.id)!=id);
+    renderNews();
+  }catch(e){console.error(e);}
 }
 
 function showAddTip(){document.getElementById('add-tip-form').style.display='block';}
@@ -713,17 +726,24 @@ async function addTipItem(){
   const body=document.getElementById('tip-body-input').value.trim();
   if(!title)return;
   const num=String(tipsItems.length+1).padStart(2,'0');
-  tipsItems.push({id:Date.now(),num,title,body});
-  await saveContent();renderTips();
+  try{
+    const res=await fetch(API+'/api/content',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'tip',title,body,num,order:tipsItems.length})});
+    const item=await res.json();
+    tipsItems.push(item);
+    renderTips();
+  }catch(e){console.error(e);}
   document.getElementById('add-tip-form').style.display='none';
   document.getElementById('tip-title-input').value='';
   document.getElementById('tip-body-input').value='';
 }
 async function deleteTip(id){
   if(!confirm('למחוק?'))return;
-  tipsItems=tipsItems.filter(t=>t.id!==id);
-  tipsItems.forEach((t,i)=>t.num=String(i+1).padStart(2,'0'));
-  await saveContent();renderTips();
+  try{
+    await fetch(API+'/api/content/'+id,{method:'DELETE'});
+    tipsItems=tipsItems.filter(t=>(t._id||t.id)!=id);
+    tipsItems.forEach((t,i)=>t.num=String(i+1).padStart(2,'0'));
+    renderTips();
+  }catch(e){console.error(e);}
 }
 
 // ── STATS ──
