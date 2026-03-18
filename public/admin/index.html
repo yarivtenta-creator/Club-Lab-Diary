@@ -643,10 +643,22 @@ async function saveDayAndClose(){
 }
 
 async function publishMonth(){
-  const days=Object.values(monthData);
-  if(!days.length){alert('אין שינויים לפרסם');return;}
+  if(!confirm('לפרסם לוח זמנים זה לאתר?'))return;
+  // Build complete month data including defaults
+  const daysInMonth=new Date(currentYear,currentMonth,0).getDate();
+  const allDays=[];
+  for(let d=1;d<=daysInMonth;d++){
+    const date=`${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(monthData[date]){
+      allDays.push(monthData[date]);
+    } else {
+      const dayOfWeek=new Date(date+'T12:00:00').getDay();
+      const isSunToThu=dayOfWeek>=0&&dayOfWeek<=4;
+      allDays.push({date,open:isSunToThu,slots:isSunToThu?[...defaultSlots]:[]});
+    }
+  }
   try{
-    await fetch(API+'/api/monthly/month',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(days)});
+    await fetch(API+'/api/monthly/month',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(allDays)});
     alert('הלוח החודשי פורסם! 🚀');
   }catch(e){alert('שגיאה בפרסום');}
 }
