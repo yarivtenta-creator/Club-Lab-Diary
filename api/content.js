@@ -11,7 +11,7 @@ const ContentSchema = new mongoose.Schema({
   order: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });
-
+ 
 const Content = mongoose.model('Content', ContentSchema);
 
 // GET all news
