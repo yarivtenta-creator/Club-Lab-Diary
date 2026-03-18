@@ -18,12 +18,6 @@ const Content = mongoose.model('Content', ContentSchema);
 router.get('/news', async (req, res) => {
   try {
     const items = await Content.find({ type: 'news' }).sort({ createdAt: -1 });
-    if (!items.length) {
-      return res.json([
-        { _id: '1', title: 'לו"ז שבועי עלה לאוויר', body: 'שעות הבוקר והערב זמינות לקביעה. ימי ראשון–חמישי פתוחים.', date: '17 מרץ 2026' },
-        { _id: '2', title: 'שיפורים במערכת הקביעה', body: 'אישורים ישירות לוואטסאפ תוך שניות מסיום הקביעה.', date: '10 מרץ 2026' },
-      ]);
-    }
     res.json(items);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -32,13 +26,6 @@ router.get('/news', async (req, res) => {
 router.get('/tips', async (req, res) => {
   try {
     const items = await Content.find({ type: 'tip' }).sort({ order: 1, createdAt: 1 });
-    if (!items.length) {
-      return res.json([
-        { _id: '1', num: '01', title: 'EQ לפני Compressor', body: 'תמיד תנקה את הצליל עם EQ לפני שאתה מדחס — Compressor מגביר גם את הבעיות.' },
-        { _id: '2', num: '02', title: 'Gain Staging נכון', body: 'שמור על רמות כניסה בין -18 ל-12 dBFS. Headroom נכון שווה מיקס נקי.' },
-        { _id: '3', num: '03', title: 'מעברים חלקים', body: 'תרגל מעבר בין שירים ב-phrase של 8 beats. תן לאנרגיה לעלות לאט.' },
-      ]);
-    }
     res.json(items);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
