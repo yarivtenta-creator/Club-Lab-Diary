@@ -242,26 +242,37 @@ async function loadSchedule(){
   document.getElementById('schedule-rows').innerHTML='';
   document.getElementById('offline-msg')&&document.getElementById('offline-msg').remove();
   try{
-    const [sch,appts]=await Promise.all([
-      fetch('/api/schedule',{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
+    const today=new Date();
+    const from=today.toISOString().split('T')[0];
+    const futureDate=new Date(today);
+    futureDate.setDate(today.getDate()+14);
+    const to=futureDate.toISOString().split('T')[0];
+    const [available,appts]=await Promise.all([
+      fetch('/api/monthly/available/'+from+'/'+to,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
       fetch('/api/appointments',{signal:AbortSignal.timeout(8000)}).then(r=>r.json())
     ]);
     const booked=appts.filter(a=>a.status!=='cancelled').map(a=>a.date+'_'+a.time);
-    const dates=weekDates();
-    document.getElementById('week-label').textContent=fd(dates[0])+' – '+fd(dates[6]);
+    if(!available.length){
+      document.getElementById('week-label').textContent='אין זמינות כרגע';
+      return;
+    }
+    document.getElementById('week-label').textContent=formatDate(available[0].date)+' – '+formatDate(available[available.length-1].date);
     const rows=document.getElementById('schedule-rows');rows.innerHTML='';
-    sch.filter(d=>d.open).forEach((day,i)=>{
-      const ds=fd(dates[i]);
+    const dayNames=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+    available.forEach(day=>{
+      const d=new Date(day.date+'T12:00:00');
+      const dayName=dayNames[d.getDay()];
+      const ds=d.getDate()+'.'+(d.getMonth()+1);
       const row=document.createElement('div');row.className='day-row';
-      row.innerHTML='<span class="day-label">'+day.day+'</span><div class="slots"></div>';
+      row.innerHTML='<span class="day-label">'+dayName+'</span><div class="slots"></div>';
       rows.appendChild(row);
       const sd=row.querySelector('.slots');
-      [...(day.morning||[]),...(day.evening||[])].forEach(t=>{
+      (day.slots||[]).forEach(t=>{
         const ev=parseInt(t)>=18,bk=booked.includes(ds+'_'+t);
         const s=document.createElement('div');
         s.className='slot'+(ev?' evening':'')+(bk?' booked':'');
         s.textContent=t;
-        if(!bk)s.onclick=()=>pick(s,day.day,ds,t);
+        if(!bk)s.onclick=()=>pick(s,dayName,ds,t);
         sd.appendChild(s);
       });
     });
@@ -275,6 +286,10 @@ async function loadSchedule(){
       <button onclick="loadSchedule()" style="background:#ff2d8a;border:none;border-radius:10px;color:#fff;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;padding:11px 24px;cursor:pointer;">נסה שוב ←</button>
     </div>`;
   }
+}
+function formatDate(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  return d.getDate()+'.'+(d.getMonth()+1);
 }
 
 function weekDates(){
