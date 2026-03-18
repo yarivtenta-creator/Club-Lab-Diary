@@ -193,20 +193,16 @@ footer{text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);bor
 <div class="divider"></div>
 <div class="section" id="tips">
   <div class="section-header"><div class="section-line line-yellow"></div><h2>טיפים שבועיים של בן</h2></div>
-  <div class="tips-grid">
-    <div class="tip-card"><div class="tip-num">טיפ #01</div><div class="tip-title">EQ לפני Compressor</div><div class="tip-body">תמיד תנקה את הצליל עם EQ לפני שאתה מדחס — Compressor מגביר גם את הבעיות.</div></div>
-    <div class="tip-card"><div class="tip-num">טיפ #02</div><div class="tip-title">Gain Staging נכון</div><div class="tip-body">שמור על רמות כניסה בין -18 ל-12 dBFS. Headroom נכון שווה מיקס נקי.</div></div>
-    <div class="tip-card"><div class="tip-num">טיפ #03</div><div class="tip-title">מעברים חלקים</div><div class="tip-body">תרגל מעבר בין שירים ב-phrase של 8 beats. תן לאנרגיה לעלות לאט.</div></div>
+  <div class="tips-grid" id="tips-grid">
+    <div class="tip-card"><div class="tip-num">טוען...</div></div>
   </div>
 </div>
 
 <div class="divider"></div>
 <div class="section" id="news">
   <div class="section-header"><div class="section-line line-pink"></div><h2>חדשות ועדכונים</h2></div>
-  <div class="news-grid">
-    <div class="news-card"><div class="news-dot" style="background:#ff2d8a"></div><div><div class="news-date" id="news-date-1"></div><div class="news-title">לו"ז שבועי עלה לאוויר</div><div class="news-body">שעות הבוקר והערב זמינות לקביעה. ימי ראשון–חמישי פתוחים.</div></div></div>
-    <div class="news-card"><div class="news-dot" style="background:#888"></div><div><div class="news-date">10 מרץ 2026</div><div class="news-title">שיפורים במערכת הקביעה</div><div class="news-body">אישורים ישירות לוואטסאפ תוך שניות מסיום הקביעה.</div></div></div>
-    <div class="news-card"><div class="news-dot" style="background:#6ee7ff"></div><div><div class="news-date">1 מרץ 2026</div><div class="news-title">המערכת עלתה לאוויר</div><div class="news-body">ניתן לקבוע תורים ישירות מהאתר — מהיר, פשוט, בלי טלפונים.</div></div></div>
+  <div class="news-grid" id="news-grid">
+    <div class="news-card"><div class="news-dot" style="background:#ff2d8a"></div><div><div class="news-date"></div><div class="news-title">טוען...</div></div></div>
   </div>
 </div>
 
@@ -338,8 +334,35 @@ function bookAgain(){
 document.querySelectorAll('.nav-links a').forEach(a=>{
   a.addEventListener('click',e=>{e.preventDefault();document.getElementById(a.getAttribute('href').slice(1))?.scrollIntoView({behavior:'smooth'});});
 });
-document.getElementById('news-date-1').textContent=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+async function loadContent(){
+  try{
+    const [news,tips]=await Promise.all([
+      fetch('/api/content/news').then(r=>r.json()),
+      fetch('/api/content/tips').then(r=>r.json())
+    ]);
+    // Render news
+    const ng=document.getElementById('news-grid');
+    const colors=['#ff2d8a','#888','#6ee7ff'];
+    ng.innerHTML=news.slice(0,3).map((n,i)=>`
+      <div class="news-card">
+        <div class="news-dot" style="background:${colors[i%3]}"></div>
+        <div><div class="news-date">${n.date||''}</div>
+          <div class="news-title">${n.title}</div>
+          <div class="news-body">${n.body||''}</div>
+        </div>
+      </div>`).join('');
+    // Render tips
+    const tg=document.getElementById('tips-grid');
+    tg.innerHTML=tips.slice(0,3).map((t,i)=>`
+      <div class="tip-card">
+        <div class="tip-num">טיפ #${t.num||String(i+1).padStart(2,'0')}</div>
+        <div class="tip-title">${t.title}</div>
+        <div class="tip-body">${t.body||''}</div>
+      </div>`).join('');
+  }catch(e){console.error('content error',e);}
+}
 initPhone();
+loadContent();
 </script>
 </body>
 </html>
