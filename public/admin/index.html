@@ -383,8 +383,7 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
     <div class="modal-btns"><button class="modal-cancel" onclick="document.getElementById('edit-client-modal').classList.remove('open')">ביטול</button><button class="modal-save" onclick="saveEditClient()">שמור ✓</button></div>
   </div>
 </div>
-
-<!-- Edit Content Modal (News/Tips) -->
+<!-- Edit Content Modal -->
 <div class="modal-overlay" id="edit-content-modal">
   <div class="modal">
     <div class="modal-title"><span id="edit-content-title">עריכה</span><button class="modal-close" onclick="document.getElementById('edit-content-modal').classList.remove('open')">×</button></div>
@@ -393,7 +392,6 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
     <div class="modal-btns"><button class="modal-cancel" onclick="document.getElementById('edit-content-modal').classList.remove('open')">ביטול</button><button class="modal-save" onclick="saveEditContent()">שמור ✓</button></div>
   </div>
 </div>
-
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-title"><span>שיעור חדש</span><button class="modal-close" onclick="closeModal()">×</button></div>
@@ -520,7 +518,7 @@ function renderClients(list){
       <span style="color:var(--muted);direction:ltr;font-size:12px">${c.phone}</span>
       <span><span class="vbadge">${c.visits||0}</span></span>
       <span style="color:var(--muted);font-size:12px">${last}</span>
-      <span style="color:var(--pink);font-size:12px;cursor:pointer" onclick="openEditClient(this)" data-id="${c._id||c.id}" data-name="${(c.name||'').replace(/"/g,'&quot;')}" data-phone="${c.phone||''}" data-type="${c.type||''}" data-day="${c.day||''}" data-time="${c.time||''}">✎</span>
+      <span style="color:var(--pink);font-size:12px;cursor:pointer" onclick="openEditClient(this)" data-id="${c._id||c.id}" data-name="${(c.name||'').replace(/"/g,'&quot;')}" data-phone="${(c.phone||'').replace(/"/g,'&quot;')}" data-type="${(c.type||'').replace(/"/g,'&quot;')}" data-day="${(c.day||'').replace(/"/g,'&quot;')}" data-time="${(c.time||'').replace(/"/g,'&quot;')}">✎</span>
     </div>`;
   }).join('');
 }
@@ -554,16 +552,6 @@ async function loadMonth(){
     monthData={};
     days.forEach(d=>monthData[d.date]=d);
   }catch(e){monthData={};}
-  // Auto-populate defaults for all days in month
-  const daysInMonth=new Date(currentYear,currentMonth,0).getDate();
-  for(let d=1;d<=daysInMonth;d++){
-    const date=`${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    if(!monthData[date]){
-      const dayOfWeek=new Date(date+'T12:00:00').getDay();
-      const isSunToThu=dayOfWeek>=0&&dayOfWeek<=4;
-      monthData[date]={date,open:isSunToThu,slots:isSunToThu?[...defaultSlots]:[]};
-    }
-  }
   renderCalendar();
   renderDefaultSlots();
 }
@@ -674,22 +662,10 @@ async function saveDayAndClose(){
 }
 
 async function publishMonth(){
-  if(!confirm('לפרסם לוח זמנים זה לאתר?'))return;
-  // Build complete month data including defaults
-  const daysInMonth=new Date(currentYear,currentMonth,0).getDate();
-  const allDays=[];
-  for(let d=1;d<=daysInMonth;d++){
-    const date=`${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    if(monthData[date]){
-      allDays.push(monthData[date]);
-    } else {
-      const dayOfWeek=new Date(date+'T12:00:00').getDay();
-      const isSunToThu=dayOfWeek>=0&&dayOfWeek<=4;
-      allDays.push({date,open:isSunToThu,slots:isSunToThu?[...defaultSlots]:[]});
-    }
-  }
+  const days=Object.values(monthData);
+  if(!days.length){alert('אין שינויים לפרסם');return;}
   try{
-    await fetch(API+'/api/monthly/month',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(allDays)});
+    await fetch(API+'/api/monthly/month',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(days)});
     alert('הלוח החודשי פורסם! 🚀');
   }catch(e){alert('שגיאה בפרסום');}
 }
@@ -874,14 +850,11 @@ function openEditClient(el){
   document.getElementById('ec-name').value=el.dataset.name||'';
   document.getElementById('ec-phone').value=el.dataset.phone||'';
   const typeEl=document.getElementById('ec-type');
-  const typeVal=el.dataset.type||'';
-  [...typeEl.options].forEach(o=>{if(o.value===typeVal||o.text===typeVal)typeEl.value=o.value;});
+  const tv=el.dataset.type||'';[...typeEl.options].forEach(o=>{if(o.value===tv||o.text===tv)typeEl.value=o.value;});
   const dayEl=document.getElementById('ec-day');
-  const dayVal=el.dataset.day||'';
-  [...dayEl.options].forEach(o=>{if(o.value===dayVal||o.text===dayVal)dayEl.value=o.value;});
+  const dv=el.dataset.day||'';[...dayEl.options].forEach(o=>{if(o.value===dv||o.text===dv)dayEl.value=o.value;});
   const timeEl=document.getElementById('ec-time');
-  const timeVal=el.dataset.time||'';
-  [...timeEl.options].forEach(o=>{if(o.value===timeVal||o.text===timeVal)timeEl.value=o.value;});
+  const tiv=el.dataset.time||'';[...timeEl.options].forEach(o=>{if(o.value===tiv||o.text===tiv)timeEl.value=o.value;});
   document.getElementById('edit-client-modal').classList.add('open');
 }
 async function saveEditClient(){
@@ -924,14 +897,12 @@ document.getElementById('edit-content-modal').addEventListener('click',e=>{if(e.
 
 // ── EDIT SECTION TITLES ──
 function editSectionTitle(id){
-  const el=document.getElementById(id);
-  if(!el)return;
+  const el=document.getElementById(id);if(!el)return;
   const current=el.textContent;
   const input=document.createElement('input');
   input.value=current;
   input.style.cssText='font-size:15px;font-weight:700;background:var(--surface2);border:0.5px solid var(--pink-border);border-radius:6px;padding:2px 8px;color:var(--text);font-family:inherit;width:200px;';
-  el.replaceWith(input);
-  input.focus();input.select();
+  el.replaceWith(input);input.focus();input.select();
   function done(){
     const val=input.value.trim()||current;
     const span=document.createElement('span');
