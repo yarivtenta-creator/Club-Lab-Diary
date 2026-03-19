@@ -730,7 +730,7 @@ function renderNews(){
     <div class="content-card">
       <div class="content-card-head">
         <div><div class="item-title">${n.title}</div><div class="item-body" style="margin-top:3px">${n.date}</div></div>
-        <button class="item-del" style="margin-left:4px" onclick="openEditContent('news','${n._id||n.id}','${(n.title||'').replace(/'/g,'\`')}','${(n.body||'').replace(/'/g,'\`')}')">✎</button>
+        <button class="item-del" style="margin-left:4px" data-type="news" data-id="${n._id||n.id}" data-title="${(n.title||'').replace(/"/g,'&quot;')}" data-body="${(n.body||'').replace(/"/g,'&quot;')}" onclick="openEditContent(this)">✎</button>
         <button class="item-del" onclick="deleteNews('${n._id||n.id}')">✕</button>
       </div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6">${n.body}</div>
@@ -742,7 +742,7 @@ function renderTips(){
     <div class="content-card">
       <div class="content-card-head">
         <div><div style="font-size:11px;font-weight:700;color:#ffd166;margin-bottom:3px">טיפ #${t.num}</div><div class="item-title">${t.title}</div></div>
-        <button class="item-del" style="margin-left:4px" onclick="openEditContent('tip','${t._id||t.id}','${(t.title||'').replace(/'/g,'\`')}','${(t.body||'').replace(/'/g,'\`')}')">✎</button>
+        <button class="item-del" style="margin-left:4px" data-type="tip" data-id="${t._id||t.id}" data-title="${(t.title||'').replace(/"/g,'&quot;')}" data-body="${(t.body||'').replace(/"/g,'&quot;')}" onclick="openEditContent(this)">✎</button>
         <button class="item-del" onclick="deleteTip('${t._id||t.id}')">✕</button>
       </div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6">${t.body}</div>
@@ -895,12 +895,13 @@ document.getElementById('edit-client-modal').addEventListener('click',e=>{if(e.t
 
 // ── EDIT NEWS / TIPS ──
 let editingContentType=null,editingContentId=null;
-function openEditContent(type,id,title,body){
+function openEditContent(el){
+  const type=el.dataset.type, id=el.dataset.id, title=el.dataset.title, body=el.dataset.body;
   editingContentType=type;
   editingContentId=id;
   document.getElementById('edit-content-title').textContent=type==='news'?'עריכת חדשה':'עריכת טיפ';
-  document.getElementById('econ-title').value=title.replace(/`/g,"'");
-  document.getElementById('econ-body').value=body.replace(/`/g,"'");
+  document.getElementById('econ-title').value=title;
+  document.getElementById('econ-body').value=body;
   document.getElementById('edit-content-modal').classList.add('open');
 }
 async function saveEditContent(){
