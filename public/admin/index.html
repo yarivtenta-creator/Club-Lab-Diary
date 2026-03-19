@@ -937,16 +937,20 @@ function editSectionTitle(id){
     const span=document.createElement('span');
     span.id=id;span.style.cssText='font-size:15px;font-weight:700;';span.textContent=val;
     input.replaceWith(span);
-    localStorage.setItem('sectionTitle_'+id,val);
+    fetch(API+'/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:id,value:val})}).catch(()=>{});
   }
   input.addEventListener('blur',done);
   input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=current;input.blur();}});
 }
-function restoreSectionTitles(){
-  ['news-section-title','tips-section-title'].forEach(id=>{
-    const saved=localStorage.getItem('sectionTitle_'+id);
-    if(saved){const el=document.getElementById(id);if(el)el.textContent=saved;}
-  });
+async function restoreSectionTitles(){
+  try{
+    const res=await fetch(API+'/api/settings');
+    const data=await res.json();
+    ['news-section-title','tips-section-title'].forEach(id=>{
+      const item=data.find(s=>s.key===id);
+      if(item){const el=document.getElementById(id);if(el)el.textContent=item.value;}
+    });
+  }catch(e){}
 }
 
 init();
