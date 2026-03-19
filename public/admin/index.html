@@ -363,6 +363,36 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
 </div>
 
 <!-- MODAL -->
+<!-- Edit Client Modal -->
+<div class="modal-overlay" id="edit-client-modal">
+  <div class="modal">
+    <div class="modal-title"><span>עריכת תלמיד</span><button class="modal-close" onclick="document.getElementById('edit-client-modal').classList.remove('open')">×</button></div>
+    <div class="modal-field"><label>שם תלמיד</label><input class="modal-input" id="ec-name" placeholder="שם מלא"></div>
+    <div class="modal-field"><label>טלפון</label><input class="modal-input" id="ec-phone" placeholder="05X-XXXXXXX" dir="ltr"></div>
+    <div class="modal-field"><label>סוג שיעור</label>
+      <select class="modal-input" id="ec-type"><option>DJ מתחיל</option><option>הפקה מוזיקלית</option><option>מיקסינג מתקדם</option></select>
+    </div>
+    <div class="modal-field" style="display:flex;gap:7px;">
+      <div style="flex:1"><label>יום</label>
+        <select class="modal-input" id="ec-day"><option>ראשון</option><option>שני</option><option>שלישי</option><option>רביעי</option><option>חמישי</option></select>
+      </div>
+      <div style="flex:1"><label>שעה</label>
+        <select class="modal-input" id="ec-time"><option>10:30</option><option>12:30</option><option>20:00</option><option>20:30</option><option>22:00</option><option>22:30</option></select>
+      </div>
+    </div>
+    <div class="modal-btns"><button class="modal-cancel" onclick="document.getElementById('edit-client-modal').classList.remove('open')">ביטול</button><button class="modal-save" onclick="saveEditClient()">שמור ✓</button></div>
+  </div>
+</div>
+<!-- Edit Content Modal (News/Tips) -->
+<div class="modal-overlay" id="edit-content-modal">
+  <div class="modal">
+    <div class="modal-title"><span id="edit-content-title">עריכה</span><button class="modal-close" onclick="document.getElementById('edit-content-modal').classList.remove('open')">×</button></div>
+    <div class="modal-field"><label>כותרת</label><input class="modal-input" id="econ-title" placeholder="כותרת"></div>
+    <div class="modal-field"><label>תוכן</label><textarea class="modal-input c-textarea" id="econ-body" style="height:80px;resize:vertical"></textarea></div>
+    <div class="modal-btns"><button class="modal-cancel" onclick="document.getElementById('edit-content-modal').classList.remove('open')">ביטול</button><button class="modal-save" onclick="saveEditContent()">שמור ✓</button></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-title"><span>שיעור חדש</span><button class="modal-close" onclick="closeModal()">×</button></div>
@@ -489,7 +519,7 @@ function renderClients(list){
       <span style="color:var(--muted);direction:ltr;font-size:12px">${c.phone}</span>
       <span><span class="vbadge">${c.visits||0}</span></span>
       <span style="color:var(--muted);font-size:12px">${last}</span>
-      <span style="color:var(--pink);font-size:12px;cursor:pointer">✎</span>
+      <span style="color:var(--pink);font-size:12px;cursor:pointer" onclick="openEditClient('${c._id||c.id}','${(c.name||'').replace(/'/g,'`')}','${c.phone||''}','${c.type||''}','${c.day||''}','${c.time||''}')">✎</span>
     </div>`;
   }).join('');
 }
@@ -700,6 +730,7 @@ function renderNews(){
     <div class="content-card">
       <div class="content-card-head">
         <div><div class="item-title">${n.title}</div><div class="item-body" style="margin-top:3px">${n.date}</div></div>
+        <button class="item-del" style="margin-left:4px" onclick="openEditContent('news','${n._id||n.id}','${(n.title||'').replace(/'/g,'\`')}','${(n.body||'').replace(/'/g,'\`')}')">✎</button>
         <button class="item-del" onclick="deleteNews('${n._id||n.id}')">✕</button>
       </div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6">${n.body}</div>
@@ -711,6 +742,7 @@ function renderTips(){
     <div class="content-card">
       <div class="content-card-head">
         <div><div style="font-size:11px;font-weight:700;color:#ffd166;margin-bottom:3px">טיפ #${t.num}</div><div class="item-title">${t.title}</div></div>
+        <button class="item-del" style="margin-left:4px" onclick="openEditContent('tip','${t._id||t.id}','${(t.title||'').replace(/'/g,'\`')}','${(t.body||'').replace(/'/g,'\`')}')">✎</button>
         <button class="item-del" onclick="deleteTip('${t._id||t.id}')">✕</button>
       </div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6">${t.body}</div>
@@ -830,6 +862,67 @@ async function saveAppt(){
   closeModal();loadDiary();
 }
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+// ── EDIT CLIENT ──
+let editingClientId=null;
+function openEditClient(id,name,phone,type,day,time){
+  editingClientId=id;
+  document.getElementById('ec-name').value=name.replace(/`/g,"'");
+  document.getElementById('ec-phone').value=phone;
+  const typeEl=document.getElementById('ec-type');
+  [...typeEl.options].forEach(o=>{if(o.value===type||o.text===type)typeEl.value=o.value;});
+  const dayEl=document.getElementById('ec-day');
+  [...dayEl.options].forEach(o=>{if(o.value===day||o.text===day)dayEl.value=o.value;});
+  const timeEl=document.getElementById('ec-time');
+  [...timeEl.options].forEach(o=>{if(o.value===time||o.text===time)timeEl.value=o.value;});
+  document.getElementById('edit-client-modal').classList.add('open');
+}
+async function saveEditClient(){
+  const body={name:document.getElementById('ec-name').value,phone:document.getElementById('ec-phone').value,type:document.getElementById('ec-type').value,day:document.getElementById('ec-day').value,time:document.getElementById('ec-time').value};
+  try{
+    await fetch(API+'/api/clients/'+editingClientId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const idx=allClients.findIndex(c=>(c._id||c.id)==editingClientId);
+    if(idx>-1)allClients[idx]={...allClients[idx],...body};
+  }catch(e){
+    // fallback: update locally only
+    const idx=allClients.findIndex(c=>(c._id||c.id)==editingClientId);
+    if(idx>-1)allClients[idx]={...allClients[idx],...body};
+  }
+  document.getElementById('edit-client-modal').classList.remove('open');
+  renderClients(allClients);
+}
+document.getElementById('edit-client-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
+// ── EDIT NEWS / TIPS ──
+let editingContentType=null,editingContentId=null;
+function openEditContent(type,id,title,body){
+  editingContentType=type;
+  editingContentId=id;
+  document.getElementById('edit-content-title').textContent=type==='news'?'עריכת חדשה':'עריכת טיפ';
+  document.getElementById('econ-title').value=title.replace(/`/g,"'");
+  document.getElementById('econ-body').value=body.replace(/`/g,"'");
+  document.getElementById('edit-content-modal').classList.add('open');
+}
+async function saveEditContent(){
+  const title=document.getElementById('econ-title').value.trim();
+  const body=document.getElementById('econ-body').value.trim();
+  if(!title)return;
+  try{
+    await fetch(API+'/api/content/'+editingContentId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,body})});
+  }catch(e){}
+  if(editingContentType==='news'){
+    const idx=newsItems.findIndex(n=>(n._id||n.id)==editingContentId);
+    if(idx>-1){newsItems[idx].title=title;newsItems[idx].body=body;}
+    renderNews();
+  } else {
+    const idx=tipsItems.findIndex(t=>(t._id||t.id)==editingContentId);
+    if(idx>-1){tipsItems[idx].title=title;tipsItems[idx].body=body;}
+    renderTips();
+  }
+  document.getElementById('edit-content-modal').classList.remove('open');
+}
+document.getElementById('edit-content-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
 init();
 </script>
 </body>
