@@ -387,11 +387,17 @@ async function loadContent(){
 initPhone();
 loadContent();
 
-// sync section titles edited by admin
-['news-section-title','tips-section-title'].forEach(id=>{
-  const saved=localStorage.getItem('sectionTitle_'+id);
-  if(saved){const el=document.getElementById(id);if(el)el.textContent=saved;}
-});
+// sync section titles from backend
+(async()=>{
+  try{
+    const res=await fetch('/api/settings');
+    const data=await res.json();
+    ['news-section-title','tips-section-title'].forEach(id=>{
+      const item=data.find(s=>s.key===id);
+      if(item){const el=document.getElementById(id);if(el)el.textContent=item.value;}
+    });
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
