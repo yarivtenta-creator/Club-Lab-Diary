@@ -196,7 +196,7 @@ footer{text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);bor
 
 <div class="divider"></div>
 <div class="section" id="tips">
-  <div class="section-header"><div class="section-line line-yellow"></div><h2>טיפים שבועיים של בן</h2></div>
+  <div class="section-header"><div class="section-line line-yellow"></div><h2 id="tips-section-title">טיפים שבועיים של בן</h2></div>
   <div class="tips-grid" id="tips-grid">
     <div class="tip-card"><div class="tip-num">טוען...</div></div>
   </div>
@@ -204,7 +204,7 @@ footer{text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);bor
 
 <div class="divider"></div>
 <div class="section" id="news">
-  <div class="section-header"><div class="section-line line-pink"></div><h2>חדשות ועדכונים</h2></div>
+  <div class="section-header"><div class="section-line line-pink"></div><h2 id="news-section-title">חדשות ועדכונים</h2></div>
   <div class="news-grid" id="news-grid">
     <div class="news-card"><div class="news-dot" style="background:#ff2d8a"></div><div><div class="news-date"></div><div class="news-title">טוען...</div></div></div>
   </div>
@@ -390,6 +390,18 @@ async function loadContent(){
 }
 initPhone();
 loadContent();
+
+// sync section titles from backend
+(async()=>{
+  try{
+    const res=await fetch('/api/settings');
+    const data=await res.json();
+    ['news-section-title','tips-section-title'].forEach(id=>{
+      const item=data.find(s=>s.key===id);
+      if(item){const el=document.getElementById(id);if(el)el.textContent=item.value;}
+    });
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
