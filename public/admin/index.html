@@ -323,7 +323,7 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
         <!-- TIPS -->
         <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span id="tips-section-title" style="font-size:15px;font-weight:700;">טיפים שבועיים של בן</span><span style="cursor:pointer;font-size:13px;color:var(--pink);margin-right:6px;" onclick="editSectionTitle('tips-section-title')">✎</span>
+            <span id="tips-section-title" style="font-size:15px;font-weight:700;">טיפ של היום</span><span style="cursor:pointer;font-size:13px;color:var(--pink);margin-right:6px;" onclick="editSectionTitle('tips-section-title')">✎</span>
             <button class="btn-add-item" onclick="showAddTip()">+ טיפ חדש</button>
           </div>
           <div id="add-tip-form" style="display:none;background:var(--surface);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:13px;margin-bottom:10px;">
@@ -363,6 +363,35 @@ body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direc
 </div>
 
 <!-- MODAL -->
+<!-- Edit Client Modal -->
+<div class="modal-overlay" id="edit-client-modal">
+  <div class="modal">
+    <div class="modal-title"><span>עריכת תלמיד</span><button class="modal-close" onclick="document.getElementById('edit-client-modal').classList.remove('open')">×</button></div>
+    <div class="modal-field"><label>שם תלמיד</label><input class="modal-input" id="ec-name" placeholder="שם מלא"></div>
+    <div class="modal-field"><label>טלפון</label><input class="modal-input" id="ec-phone" placeholder="05X-XXXXXXX" dir="ltr"></div>
+    <div class="modal-field"><label>סוג שיעור</label>
+      <select class="modal-input" id="ec-type"><option>DJ מתחיל</option><option>הפקה מוזיקלית</option><option>מיקסינג מתקדם</option></select>
+    </div>
+    <div class="modal-field" style="display:flex;gap:7px;">
+      <div style="flex:1"><label>יום</label>
+        <select class="modal-input" id="ec-day"><option>ראשון</option><option>שני</option><option>שלישי</option><option>רביעי</option><option>חמישי</option></select>
+      </div>
+      <div style="flex:1"><label>שעה</label>
+        <select class="modal-input" id="ec-time"><option>10:30</option><option>12:30</option><option>20:00</option><option>20:30</option><option>22:00</option><option>22:30</option></select>
+      </div>
+    </div>
+    <div class="modal-btns"><button class="modal-cancel" onclick="document.getElementById('edit-client-modal').classList.remove('open')">ביטול</button><button class="modal-save" onclick="saveEditClient()">שמור ✓</button></div>
+  </div>
+</div>
+<!-- Edit Content Modal -->
+<div class="modal-overlay" id="edit-content-modal">
+  <div class="modal">
+    <div class="modal-title"><span id="edit-content-title">עריכה</span><button class="modal-close" onclick="document.getElementById('edit-content-modal').classList.remove('open')">×</button></div>
+    <div class="modal-field"><label>כותרת</label><input class="modal-input" id="econ-title" placeholder="כותרת"></div>
+    <div class="modal-field"><label>תוכן</label><textarea class="modal-input" id="econ-body" style="height:80px;resize:vertical;font-family:inherit;"></textarea></div>
+    <div class="modal-btns"><button class="modal-cancel" onclick="document.getElementById('edit-content-modal').classList.remove('open')">ביטול</button><button class="modal-save" onclick="saveEditContent()">שמור ✓</button></div>
+  </div>
+</div>
 <!-- Edit Client Modal -->
 <div class="modal-overlay" id="edit-client-modal">
   <div class="modal">
@@ -455,14 +484,28 @@ function renderAppts(cid,appts){
     <div class="appt ${a.status}">
       <span class="appt-time">${a.time}</span>
       <div class="appt-info"><div class="appt-name">${a.name||a.phone}</div><div class="appt-type">${a.phone||''}</div></div>
-      <span class="appt-status s-${a.status}" onclick="cycleStatus('${a._id}','${a.status}')">${a.status==='confirmed'?'אושר':a.status==='pending'?'ממתין':'בוטל'}</span>
+      <span class="appt-status s-${a.status}" onclick="cycleStatus('${a._id}','${a.status}','${(a.phone||'').replace(/[^0-9]/g,'')}','${a.name||''}','${a.day||''}','${a.date||''}','${a.time||''}')">${a.status==='confirmed'?'אושר':a.status==='pending'?'ממתין':'בוטל'}</span>
+      ${a.status==='pending'?`<button style="background:#25D366;border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;cursor:pointer;" onclick="approveAndNotify('${a._id}','${(a.phone||'').replace(/[^0-9]/g,'')}','${a.name||''}','${a.day||''}','${a.date||''}','${a.time||''}')">✓ אשר</button>`:''}
       <button class="del-btn" onclick="delAppt('${a._id}')">✕</button>
     </div>`).join('')+'<div class="empty-slot" onclick="openModal()">+ הוסף שיעור</div>';
 }
 
-async function cycleStatus(id,cur){
+async function cycleStatus(id,cur,phone,name,day,date,time){
   const next=cur==='pending'?'confirmed':cur==='confirmed'?'cancelled':'pending';
   await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});
+  if(next==='confirmed'&&phone){
+    const msg=encodeURIComponent('🎧 שלום '+name+'!\nהשיעור שלך אושר ✅\nיום: '+day+(date?' ('+date+')':'')+'\nשעה: '+time+'\nמיקום: The Club Lab\nנתראה! 🎶');
+    window.open('https://wa.me/972'+phone.replace(/^0/,'')+'?text='+msg,'_blank');
+  }
+  loadDiary();
+}
+
+async function approveAndNotify(id,phone,name,day,date,time){
+  await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'confirmed'})});
+  if(phone){
+    const msg=encodeURIComponent('🎧 שלום '+name+'!\nהשיעור שלך אושר ✅\nיום: '+day+(date?' ('+date+')':'')+'\nשעה: '+time+'\nמיקום: The Club Lab\nנתראה! 🎶');
+    window.open('https://wa.me/972'+phone.replace(/^0/,'')+'?text='+msg,'_blank');
+  }
   loadDiary();
 }
 async function delAppt(id){
@@ -924,7 +967,86 @@ async function restoreSectionTitles(){
   }catch(e){}
 }
 
+// ── EDIT CLIENT ──
+let editingClientId=null;
+function openEditClient(el){
+  editingClientId=el.dataset.id;
+  document.getElementById('ec-name').value=el.dataset.name||'';
+  document.getElementById('ec-phone').value=el.dataset.phone||'';
+  const tv=el.dataset.type||'';const typeEl=document.getElementById('ec-type');[...typeEl.options].forEach(o=>{if(o.value===tv||o.text===tv)typeEl.value=o.value;});
+  const dv=el.dataset.day||'';const dayEl=document.getElementById('ec-day');[...dayEl.options].forEach(o=>{if(o.value===dv||o.text===dv)dayEl.value=o.value;});
+  const tiv=el.dataset.time||'';const timeEl=document.getElementById('ec-time');[...timeEl.options].forEach(o=>{if(o.value===tiv||o.text===tiv)timeEl.value=o.value;});
+  document.getElementById('edit-client-modal').classList.add('open');
+}
+async function saveEditClient(){
+  const body={name:document.getElementById('ec-name').value,phone:document.getElementById('ec-phone').value,type:document.getElementById('ec-type').value,day:document.getElementById('ec-day').value,time:document.getElementById('ec-time').value};
+  try{await fetch(API+'/api/clients/'+editingClientId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}catch(e){}
+  const idx=allClients.findIndex(c=>(c._id||c.id)==editingClientId);
+  if(idx>-1)allClients[idx]={...allClients[idx],...body};
+  document.getElementById('edit-client-modal').classList.remove('open');
+  renderClients(allClients);
+}
+document.getElementById('edit-client-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
+// ── EDIT NEWS / TIPS ──
+let editingContentType=null,editingContentId=null;
+function openEditContent(el){
+  editingContentType=el.dataset.type;
+  editingContentId=el.dataset.id;
+  document.getElementById('edit-content-title').textContent=editingContentType==='news'?'עריכת חדשה':'עריכת טיפ';
+  document.getElementById('econ-title').value=el.dataset.title||'';
+  document.getElementById('econ-body').value=el.dataset.body||'';
+  document.getElementById('edit-content-modal').classList.add('open');
+}
+async function saveEditContent(){
+  const title=document.getElementById('econ-title').value.trim();
+  const body=document.getElementById('econ-body').value.trim();
+  if(!title)return;
+  try{await fetch(API+'/api/content/'+editingContentId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,body})});}catch(e){}
+  if(editingContentType==='news'){
+    const idx=newsItems.findIndex(n=>(n._id||n.id)==editingContentId);
+    if(idx>-1){newsItems[idx].title=title;newsItems[idx].body=body;}
+    renderNews();
+  }else{
+    const idx=tipsItems.findIndex(t=>(t._id||t.id)==editingContentId);
+    if(idx>-1){tipsItems[idx].title=title;tipsItems[idx].body=body;}
+    renderTips();
+  }
+  document.getElementById('edit-content-modal').classList.remove('open');
+}
+document.getElementById('edit-content-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
+// ── EDIT SECTION TITLES ──
+function editSectionTitle(id){
+  const el=document.getElementById(id);if(!el)return;
+  const current=el.textContent;
+  const input=document.createElement('input');
+  input.value=current;
+  input.style.cssText='font-size:15px;font-weight:700;background:var(--surface2);border:0.5px solid var(--pink-border);border-radius:6px;padding:2px 8px;color:var(--text);font-family:inherit;width:200px;';
+  el.replaceWith(input);input.focus();input.select();
+  function done(){
+    const val=input.value.trim()||current;
+    const span=document.createElement('span');
+    span.id=id;span.style.cssText='font-size:15px;font-weight:700;';span.textContent=val;
+    input.replaceWith(span);
+    fetch(API+'/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:id,value:val})}).catch(()=>{});
+  }
+  input.addEventListener('blur',done);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=current;input.blur();}});
+}
+async function restoreSectionTitles(){
+  try{
+    const res=await fetch(API+'/api/settings');
+    const data=await res.json();
+    ['news-section-title','tips-section-title'].forEach(id=>{
+      const item=data.find(s=>s.key===id);
+      if(item){const el=document.getElementById(id);if(el)el.textContent=item.value;}
+    });
+  }catch(e){}
+}
+
 init();
+restoreSectionTitles();
 restoreSectionTitles();
 </script>
 </body>
