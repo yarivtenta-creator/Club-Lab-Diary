@@ -2,950 +2,401 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Club Lab — ניהול</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>The Club Lab — קביעת שיעור</title>
+<meta property="og:title" content="The Club Lab — קביעת שיעור">
+<meta property="og:description" content="קבע שיעור DJ או הפקה מוזיקלית תוך שניות">
+<meta property="og:image" content="/images/logo.jpg">
+<meta property="og:type" content="website">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#f0f0f0;--surface:#ffffff;--surface2:#f5f5f5;--surface3:#e8e8e8;--pink:#ff2d8a;--pink-dim:rgba(255,45,138,.08);--pink-border:rgba(255,45,138,.25);--text:#1a1a1a;--muted:#666;--border:rgba(0,0,0,.1);--radius:10px;--sidebar:214px;}
-body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
-.app{display:flex;height:100vh;overflow:hidden;}
-.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s;}
-.sidebar-head{padding:13px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.s-logo{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid var(--pink-border);}
-.s-brand span:first-child{font-size:11px;font-weight:900;color:var(--text);}
-.s-brand span:last-child{font-size:9px;color:var(--pink);}
-/* MOBILE */
-@media(max-width:600px){
-  .sidebar{position:fixed;top:0;right:0;height:100vh;z-index:200;transform:translateX(100%);box-shadow:-4px 0 20px rgba(0,0,0,.12);}
-  .sidebar.open{transform:translateX(0);}
-  .main{width:100%;}
-  .diary-grid{grid-template-columns:1fr!important;}
-  .stat-row{grid-template-columns:1fr 1fr!important;}
-  .stats-grid{grid-template-columns:1fr!important;}
-  .hamburger{display:flex!important;}
-  .topbar{padding:10px 12px;}
-  .page{padding:12px;}
-  .mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:190;}
-  .mobile-overlay.open{display:block;}
-}
-.hamburger{display:none;align-items:center;justify-content:center;width:36px;height:36px;background:none;border:1px solid var(--border);border-radius:8px;cursor:pointer;flex-shrink:0;}
-.hamburger span{display:block;width:18px;height:2px;background:var(--text);margin:3px auto;border-radius:2px;}
-.s-brand{display:flex;flex-direction:column;line-height:1.2;}
-.s-brand span:first-child{font-size:11px;font-weight:900;}
-.s-brand span:last-child{font-size:9px;color:var(--pink);}
-.nav-section{padding:10px 8px 3px;font-size:9px;font-weight:700;color:#999;letter-spacing:.08em;text-transform:uppercase;}
-.nav-item{display:flex;align-items:center;gap:8px;padding:9px 11px;margin:1px 5px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all .15s;border:none;background:none;width:calc(100% - 10px);text-align:right;}
-.nav-item:hover{background:var(--surface2);color:var(--text);}
-.nav-item.active{background:var(--pink-dim);color:var(--pink);border:.5px solid var(--pink-border);}
-.nav-icon{width:15px;height:15px;flex-shrink:0;}
-.sidebar-footer{margin-top:auto;padding:10px 12px;border-top:.5px solid var(--border);font-size:11px;color:#444;flex-shrink:0;}
-.online-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#25D366;margin-left:4px;vertical-align:middle;}
-.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
-.topbar{padding:11px 18px;border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:10;flex-shrink:0;}
-.topbar-title{font-size:15px;font-weight:700;}
-.topbar-right{display:flex;align-items:center;gap:10px;}
-.topbar-date{font-size:12px;color:var(--muted);}
-.add-btn{padding:7px 13px;background:var(--pink);border:none;border-radius:8px;color:#fff;font-family:'Heebo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
-.add-btn:hover{opacity:.85;}
-.page{display:none;flex:1;padding:16px 18px;flex-direction:column;gap:14px;}
-.page.active{display:flex;}
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
-.stat-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:13px;}
-.stat-card.hl{border-color:var(--pink-border);background:var(--pink-dim);}
-.stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
-.stat-val{font-size:22px;font-weight:900;line-height:1;}
-.stat-val.pink{color:var(--pink);}
-.stat-sub{font-size:11px;color:var(--muted);margin-top:3px;}
-.diary-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;flex:1;min-height:0;}
-.diary-col{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
-.col-head{padding:9px 13px;border-bottom:.5px solid var(--border);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
-.col-date{font-size:11px;color:var(--muted);font-weight:400;}
-.appt-list{flex:1;overflow-y:auto;padding:7px;}
-.appt{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;margin-bottom:3px;border:.5px solid transparent;transition:background .15s;}
-.appt:hover{background:var(--surface2);}
-.appt.confirmed{border-right:2px solid var(--pink);}
-.appt.pending{border-right:2px solid #ffd166;}
-.appt.cancelled{border-right:2px solid #444;opacity:.45;}
-.appt-time{font-size:11px;font-weight:700;color:var(--muted);min-width:34px;direction:ltr;}
-.appt-info{flex:1;}
-.appt-name{font-size:13px;font-weight:600;}
-.appt-type{font-size:11px;color:var(--muted);}
-.appt-status{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;cursor:pointer;}
-.s-confirmed{background:var(--pink-dim);color:var(--pink);}
-.s-pending{background:rgba(255,209,102,.12);color:#ffd166;}
-.s-cancelled{background:var(--surface3);color:var(--muted);}
-.del-btn{color:#e24b4a;font-size:14px;cursor:pointer;padding:2px 5px;background:none;border:none;}
-.empty-slot{padding:7px 9px;border-radius:8px;border:1px dashed var(--border);font-size:11px;color:#444;margin-bottom:3px;text-align:center;cursor:pointer;transition:border-color .15s;}
-.empty-slot:hover{border-color:var(--pink-border);color:var(--pink);}
-.clients-toolbar{display:flex;gap:8px;}
-.search-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--text);font-family:'Heebo',sans-serif;font-size:13px;outline:none;}
-.search-input:focus{border-color:var(--pink-border);}
-.search-input::placeholder{color:#444;}
-.table-wrap{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
-.t-head{display:grid;padding:8px 13px;background:var(--surface2);border-bottom:.5px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);}
-.t-row{display:grid;padding:9px 13px;border-bottom:.5px solid var(--border);font-size:13px;transition:background .15s;}
-.t-row:last-child{border-bottom:none;}
-.t-row:hover{background:var(--surface2);}
-.vbadge{display:inline-block;background:var(--surface3);padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;}
-.avatar{width:22px;height:22px;border-radius:50%;background:var(--pink-dim);border:1px solid var(--pink-border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--pink);flex-shrink:0;}
-
-/* SCHEDULE TEMPLATES */
-.templates-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px;}
-.tpl-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--muted);transition:all .2s;font-family:'Heebo',sans-serif;}
-.tpl-btn:hover{border-color:var(--pink-border);color:var(--pink);}
-.tpl-btn.active-tpl{background:var(--pink);border-color:var(--pink);color:#fff;}
-.week-editor{display:flex;flex-direction:column;gap:7px;}
-.day-editor-row{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:11px 13px;display:flex;align-items:center;gap:11px;}
-.day-editor-name{min-width:44px;font-size:13px;font-weight:700;}
-.slots-edit{display:flex;flex-wrap:wrap;gap:5px;flex:1;}
-.slot-tag{padding:4px 9px;border-radius:6px;font-size:12px;font-weight:600;direction:ltr;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;}
-.slot-morning{background:rgba(110,231,255,.08);border:.5px solid rgba(110,231,255,.25);color:#6ee7ff;}
-.slot-evening{background:var(--pink-dim);border:.5px solid var(--pink-border);color:var(--pink);}
-.slot-tag .sx{font-size:10px;opacity:.5;margin-right:2px;}
-.add-slot-btn{padding:4px 9px;border-radius:6px;font-size:12px;font-weight:600;background:var(--surface3);border:.5px dashed var(--border);color:var(--muted);cursor:pointer;font-family:'Heebo',sans-serif;}
-.add-slot-btn:hover{border-color:var(--pink-border);color:var(--pink);}
-.toggle{width:32px;height:17px;border-radius:9px;background:var(--surface3);position:relative;cursor:pointer;border:none;transition:background .2s;flex-shrink:0;}
-.toggle.on{background:var(--pink);}
-.toggle::after{content:'';position:absolute;top:2px;right:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:right .2s;}
-.toggle.on::after{right:17px;}
-.toggle-wrap{display:flex;align-items:center;gap:5px;margin-right:auto;}
-.schedule-actions{display:flex;gap:8px;flex-wrap:wrap;}
-.btn-save{padding:9px 18px;background:var(--pink);border:none;border-radius:8px;color:#fff;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
-.btn-outline{padding:9px 18px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Heebo',sans-serif;font-size:13px;cursor:pointer;}
-.btn-outline:hover{border-color:var(--pink-border);color:var(--pink);}
-
-/* NEWS/TIPS EDITOR */
-.content-grid{display:flex;flex-direction:column;gap:10px;}
-.content-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;}
-.content-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.content-label{font-size:12px;font-weight:700;color:var(--muted);}
-.content-edit-row{display:flex;gap:8px;margin-bottom:8px;}
-.c-input{background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Heebo',sans-serif;font-size:13px;outline:none;width:100%;}
-.c-input:focus{border-color:var(--pink-border);}
-.c-input::placeholder{color:#444;}
-.c-textarea{resize:vertical;min-height:60px;}
-.btn-add-item{padding:8px 14px;background:var(--pink-dim);border:1px solid var(--pink-border);border-radius:8px;color:var(--pink);font-family:'Heebo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
-.item-row{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:8px;margin-bottom:6px;}
-.item-content{flex:1;}
-.item-title{font-size:13px;font-weight:600;margin-bottom:2px;}
-.item-body{font-size:12px;color:var(--muted);line-height:1.5;}
-.item-del{color:#e24b4a;cursor:pointer;font-size:16px;background:none;border:none;padding:0 4px;flex-shrink:0;}
-
-/* STATS */
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
-.chart-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:13px;}
-.chart-title{font-size:12px;font-weight:700;margin-bottom:11px;color:var(--muted);}
-.bar-chart{display:flex;align-items:flex-end;gap:5px;height:75px;}
-.bar-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;}
-.bar{width:100%;border-radius:4px 4px 0 0;background:var(--pink-dim);border:.5px solid var(--pink-border);min-height:4px;}
-.bar.full{background:var(--pink);border-color:var(--pink);}
-.bar-label{font-size:9px;color:var(--muted);}
-.bar-val{font-size:9px;font-weight:700;color:var(--pink);}
-.kpi-list{display:flex;flex-direction:column;gap:7px;}
-.kpi-row{display:flex;justify-content:space-between;font-size:13px;}
-.kpi-row span:first-child{color:var(--muted);}
-.kpi-row span:last-child{font-weight:700;}
-.up{color:#25D366;}.down{color:#e24b4a;}
-
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
-.modal-overlay.open{display:flex;}
-.modal{background:var(--surface);border:.5px solid var(--pink-border);border-radius:14px;padding:20px;width:310px;}
-.modal-title{font-size:15px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;justify-content:space-between;}
-.modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;}
-.modal-field{margin-bottom:11px;}
-.modal-field label{font-size:11px;color:var(--muted);margin-bottom:3px;display:block;}
-.modal-input{width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Heebo',sans-serif;font-size:13px;outline:none;}
-.modal-input:focus{border-color:var(--pink-border);}
-.modal-btns{display:flex;gap:7px;margin-top:14px;}
-.modal-save{flex:1;padding:10px;background:var(--pink);border:none;border-radius:8px;color:#fff;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
-.modal-cancel{padding:10px 13px;background:none;border:0.5px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Heebo',sans-serif;font-size:13px;cursor:pointer;}
-.tpl-name-input{background:var(--surface2);border:.5px solid var(--pink-border);border-radius:8px;padding:7px 11px;color:var(--text);font-family:'Heebo',sans-serif;font-size:13px;outline:none;width:160px;}
+:root{--bg:#050508;--surface:rgba(17,17,17,0.9);--surface2:rgba(26,26,26,0.95);--pink:#ff2d8a;--pink-dim:rgba(255,45,138,0.1);--pink-border:rgba(255,45,138,0.25);--text:#f5f5f5;--muted:#888;--border:rgba(255,255,255,0.07);--radius:12px;}
+html,body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;min-height:100vh;overflow-x:hidden;-webkit-text-size-adjust:100%;}
+.bg-wrap{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.bg-wrap img{width:100%;height:100%;object-fit:cover;opacity:0.15;filter:saturate(0.6) brightness(0.4);}
+.bg-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,5,8,0.7) 0%,rgba(5,5,8,0.4) 40%,rgba(5,5,8,0.85) 100%);}
+.page{position:relative;z-index:1;}
+nav{position:sticky;top:0;z-index:100;background:rgba(5,5,8,0.95);backdrop-filter:blur(16px);border-bottom:0.5px solid var(--pink-border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
+.logo-wrap{display:flex;align-items:center;gap:9px;}
+.logo-img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid var(--pink-border);}
+.logo-text{display:flex;flex-direction:column;line-height:1.2;}
+.logo-main{font-size:12px;font-weight:900;letter-spacing:.4px;}
+.logo-sub{font-size:9px;color:var(--pink);}
+.nav-links{display:flex;gap:10px;list-style:none;}
+.nav-links a{font-size:12px;color:var(--muted);text-decoration:none;}
+.hero{text-align:center;padding:36px 16px 28px;position:relative;}
+.hero-logo{width:76px;height:76px;border-radius:50%;object-fit:cover;margin:0 auto 13px;display:block;border:2px solid var(--pink-border);box-shadow:0 0 28px rgba(255,45,138,0.2);}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--pink-dim);border:.5px solid var(--pink-border);border-radius:20px;padding:5px 13px;font-size:11px;color:var(--pink);margin-bottom:12px;}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--pink);animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+h1{font-size:clamp(28px,9vw,48px);font-weight:900;line-height:1.1;margin-bottom:10px;}
+.h1-accent{color:var(--pink);}
+.hero-sub{font-size:14px;color:var(--muted);max-width:320px;margin:0 auto 22px;line-height:1.7;}
+.booking-container{max-width:440px;margin:0 auto;padding:0 12px;}
+.steps{display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:16px;}
+.step-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);transition:color .3s;}
+.step-item.active{color:var(--pink);}
+.step-item.done{color:var(--pink);opacity:.55;}
+.step-num{width:20px;height:20px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+.step-item.active .step-num{background:var(--pink);border-color:var(--pink);color:#fff;}
+.step-item.done .step-num{background:rgba(255,45,138,.3);border-color:var(--pink);color:#fff;}
+.step-line{width:20px;height:1px;background:var(--pink-border);}
+.booking-card{background:var(--surface);backdrop-filter:blur(20px);border:.5px solid var(--pink-border);border-radius:16px;padding:20px 16px;}
+.card-title{font-size:16px;font-weight:700;margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.week-badge{display:inline-flex;align-items:center;background:rgba(110,231,255,.08);border:.5px solid rgba(110,231,255,.25);border-radius:8px;padding:4px 10px;font-size:11px;color:#6ee7ff;margin-bottom:12px;direction:ltr;}
+.saved-banner{background:rgba(255,45,138,0.08);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:11px 13px;margin-bottom:13px;display:flex;align-items:center;justify-content:space-between;}
+.saved-banner span{color:var(--muted);font-size:11px;display:block;margin-bottom:2px;}
+.saved-num{font-weight:700;font-size:15px;direction:ltr;}
+.change-btn{font-size:11px;color:var(--pink);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'Heebo',sans-serif;padding:0;}
+.phone-wrap{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--pink-border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s;margin-bottom:13px;}
+.phone-wrap:focus-within{border-color:var(--pink);}
+.phone-prefix{padding:13px 11px;font-size:13px;color:var(--muted);border-left:1px solid var(--pink-border);background:rgba(255,45,138,.05);user-select:none;white-space:nowrap;}
+.phone-input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Heebo',sans-serif;font-size:16px;font-weight:500;padding:13px 12px;direction:ltr;text-align:right;min-width:0;}
+.phone-input::placeholder{color:var(--muted);}
+.btn-primary{width:100%;padding:14px;background:var(--pink);border:none;border-radius:var(--radius);color:#fff;font-family:'Heebo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;-webkit-appearance:none;}
+.btn-secondary{background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--muted);font-family:'Heebo',sans-serif;font-size:13px;padding:10px 16px;cursor:pointer;margin-top:9px;width:100%;-webkit-appearance:none;}
+.schedule-days{display:flex;flex-direction:column;gap:10px;margin-bottom:13px;}
+.day-row{display:flex;align-items:flex-start;gap:8px;}
+.day-label{min-width:40px;font-size:12px;font-weight:700;color:var(--muted);padding-top:7px;}
+.slots{display:flex;flex-wrap:wrap;gap:6px;flex:1;}
+.slot{padding:7px 11px;background:var(--surface2);border:1px solid rgba(255,45,138,.2);border-radius:8px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;direction:ltr;-webkit-tap-highlight-color:transparent;}
+.slot:active{transform:scale(0.95);}
+.slot.selected{background:var(--pink);border-color:var(--pink);color:#fff;font-weight:700;}
+.slot.evening{border-color:rgba(110,231,255,.22);}
+.slot.evening.selected{background:#6ee7ff;border-color:#6ee7ff;color:#050508;}
+.slot.booked{opacity:.3;cursor:not-allowed;pointer-events:none;text-decoration:line-through;}
+.slot-info{background:rgba(255,45,138,.07);border:1px solid rgba(255,45,138,.2);border-radius:var(--radius);padding:10px 13px;font-size:13px;margin-bottom:13px;display:none;}
+.slot-info.visible{display:block;}
+.slot-detail{display:flex;justify-content:space-between;}
+.slot-detail span:first-child{color:var(--muted);font-size:12px;}
+.slot-detail span:last-child{font-weight:600;color:var(--pink);}
+.confirm-icon{width:56px;height:56px;border-radius:50%;background:rgba(255,45,138,.1);border:1px solid rgba(255,45,138,.35);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.confirm-details{background:var(--surface2);border-radius:var(--radius);padding:13px;margin-bottom:14px;}
+.confirm-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:.5px solid var(--border);}
+.confirm-row:last-child{border-bottom:none;}
+.confirm-row span:first-child{color:var(--muted);}
+.confirm-row span:last-child{font-weight:600;}
+.whatsapp-btn{width:100%;padding:14px;background:#25D366;border:none;border-radius:var(--radius);color:#fff;font-family:'Heebo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;-webkit-appearance:none;}
+.section{padding:40px 16px;max-width:640px;margin:0 auto;}
+.section-header{display:flex;align-items:center;gap:11px;margin-bottom:18px;}
+.section-line{width:3px;height:22px;border-radius:2px;}
+.line-pink{background:var(--pink);}.line-cyan{background:#6ee7ff;}.line-yellow{background:#ffd166;}
+.section-header h2{font-size:19px;font-weight:700;}
+.tips-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:520px){.tips-grid{grid-template-columns:1fr;}}
+.tip-card{background:var(--surface);border:.5px solid rgba(255,209,102,.2);border-radius:var(--radius);padding:15px;}
+.tip-num{font-size:11px;font-weight:700;color:#ffd166;margin-bottom:5px;}
+.tip-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.tip-body{font-size:12px;color:var(--muted);line-height:1.65;}
+.news-grid{display:flex;flex-direction:column;gap:9px;}
+.news-card{background:var(--surface);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:14px;display:flex;gap:12px;}
+.news-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.news-date{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.news-title{font-size:14px;font-weight:600;margin-bottom:3px;}
+.news-body{font-size:12px;color:var(--muted);line-height:1.6;}
+.about-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px;}
+.about-stat{background:var(--surface);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:14px;text-align:center;}
+.about-stat .num{font-size:24px;font-weight:900;color:var(--pink);}
+.about-stat .label{font-size:11px;color:var(--muted);margin-top:3px;}
+.about-desc{font-size:13px;color:var(--muted);line-height:1.8;background:var(--surface);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:15px;}
+.divider{height:.5px;background:var(--pink-border);max-width:640px;margin:0 auto;}
+.step{display:none;}.step.active{display:block;}
+footer{text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);border-top:.5px solid var(--pink-border);display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(5,5,8,.9);position:relative;z-index:1;}
+.footer-logo{width:24px;height:24px;border-radius:50%;object-fit:cover;opacity:.5;}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="sidebar">
-    <div class="sidebar-head">
-      <img class="s-logo" src="/images/logo.jpg" alt="logo">
-      <div class="s-brand"><span>THE CLUB LAB</span><span>מערכת ניהול</span></div>
-    </div>
-    <div class="nav-section">ראשי</div>
-    <button class="nav-item active" onclick="showPage('diary',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>יומן
-    </button>
-    <button class="nav-item" onclick="showPage('lessons',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>כל השיעורים
-    </button>
-    <button class="nav-item" onclick="showPage('clients',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>תלמידים
-    </button>
-    <div class="nav-section">תוכן</div>
-    <button class="nav-item" onclick="showPage('schedule',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>לו"ז ותבניות
-    </button>
-    <button class="nav-item" onclick="showPage('content',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>חדשות וטיפים
-    </button>
-    <div class="nav-section">דוחות</div>
-    <button class="nav-item" onclick="showPage('stats',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>סטטיסטיקות
-    </button>
-    <div class="sidebar-footer"><span class="online-dot"></span>מחובר · בן</div>
+<div class="bg-wrap"><img src="/images/bg_main.png" alt=""></div>
+<div class="page">
+<nav>
+  <div class="logo-wrap">
+    <img class="logo-img" src="/images/logo.jpg" alt="The Club Lab">
+    <div class="logo-text"><span class="logo-main">THE CLUB LAB</span><span class="logo-sub">המעבדה למקצועות הקלאב</span></div>
   </div>
+  <ul class="nav-links">
+    <li><a href="#booking">שיעור</a></li>
+    <li><a href="#tips">טיפים</a></li>
+    <li><a href="#news">חדשות</a></li>
+    
+  </ul>
+</nav>
 
-  <div class="main">
-    <div class="topbar">
-      <div class="topbar-title" id="page-title">יומן</div>
-      <div class="topbar-right">
-        <span class="topbar-date" id="today-label"></span>
-        <button class="add-btn" id="top-add-btn" onclick="openModal()">+ שיעור חדש</button>
-        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
-      </div>
-    </div>
-<div class="mobile-overlay" id="mob-overlay" onclick="toggleSidebar()"></div>
+<div class="hero">
+  <img class="hero-logo" src="/images/logo.jpg" alt="The Club Lab Logo">
+  <div class="hero-badge"><span class="pulse"></span>המעבדה למקצועות הקלאב</div>
+  <h1>קבע שיעור<br><span class="h1-accent">תוך שניות</span></h1>
+  <p class="hero-sub">הכניסו מספר טלפון, בחרו זמן — ואישור יגיע לוואטסאפ</p>
 
-    <!-- DIARY -->
-    <div class="page active" id="page-diary">
-      <div class="stat-row" id="diary-stats"></div>
-      <div class="diary-grid">
-        <div class="diary-col">
-          <div class="col-head"><span>בוקר</span><span class="col-date" id="diary-date"></span></div>
-          <div class="appt-list" id="morning-list"></div>
-        </div>
-        <div class="diary-col">
-          <div class="col-head"><span>ערב</span><span class="col-date" id="diary-date2"></span></div>
-          <div class="appt-list" id="evening-list"></div>
-        </div>
-      </div>
+  <div class="booking-container" id="booking">
+    <div class="steps">
+      <div class="step-item active" id="si-1"><div class="step-num">1</div> טלפון</div>
+      <div class="step-line"></div>
+      <div class="step-item" id="si-2"><div class="step-num">2</div> זמן</div>
+      <div class="step-line"></div>
+      <div class="step-item" id="si-3"><div class="step-num">3</div> אישור</div>
     </div>
 
-    <!-- ALL LESSONS -->
-    <div class="page" id="page-lessons">
-      <div class="clients-toolbar">
-        <input class="search-input" placeholder="חיפוש שם או טלפון..." oninput="filterLessons(this.value)" style="flex:1;">
-        <select class="search-input" id="status-filter" onchange="filterLessons(document.querySelector('#page-lessons .search-input').value)" style="width:120px;flex:none;">
-          <option value="">כל הסטטוסים</option>
-          <option value="pending">ממתין</option>
-          <option value="confirmed">אושר</option>
-          <option value="cancelled">בוטל</option>
-        </select>
+    <div class="booking-card step active" id="step1">
+      <div class="card-title">מה מספר הטלפון שלך ושמך?</div>
+      <div class="card-sub">נשלח אישור לוואטסאפ</div>
+      <div class="saved-banner" id="saved-banner" style="display:none">
+        <div><span>פרטים שמורים</span><span class="saved-num" id="saved-num"></span></div>
+        <button class="change-btn" onclick="clearPhone()">שנה פרטים</button>
       </div>
-      <div class="table-wrap">
-        <div class="t-head" style="grid-template-columns:1fr 100px 60px 60px 90px 40px;">
-          <span>שם</span><span>טלפון</span><span>יום</span><span>תאריך</span><span>שעה · סטטוס</span><span></span>
+      <div id="phone-form">
+        <div class="phone-wrap" style="margin-bottom:10px;border-radius:var(--radius);overflow:hidden;display:flex;align-items:center;background:var(--surface2);border:1px solid var(--pink-border);">
+          <span class="phone-prefix" style="padding:13px 11px;font-size:13px;color:var(--muted);border-left:1px solid var(--pink-border);background:rgba(255,45,138,.05);white-space:nowrap;">👤</span>
+          <input class="phone-input" type="text" id="name-field" placeholder="שם מלא" style="direction:rtl;text-align:right;">
         </div>
-        <div id="lessons-body"></div>
+        <div class="phone-wrap">
+          <span class="phone-prefix">🇮🇱 +972</span>
+          <input class="phone-input" type="tel" id="phone-field" placeholder="05X-XXX-XXXX" maxlength="10" inputmode="numeric">
+        </div>
       </div>
+      <button class="btn-primary" onclick="goStep2()">המשך ←</button>
     </div>
 
-    <!-- CLIENTS -->
-    <div class="page" id="page-clients">
-      <div class="clients-toolbar">
-        <input class="search-input" placeholder="חיפוש תלמיד..." oninput="filterClients(this.value)">
+    <div class="booking-card step" id="step2">
+      <div class="card-title">בחרו יום ושעה</div>
+      <div class="week-badge" id="week-label">טוען...</div>
+      <div class="schedule-days" id="schedule-rows"></div>
+      <div class="slot-info" id="slot-info">
+        <div class="slot-detail"><span>יום</span><span id="info-day">—</span></div>
+        <div class="slot-detail" style="margin-top:4px"><span>תאריך</span><span id="info-date">—</span></div>
+        <div class="slot-detail" style="margin-top:4px"><span>שעה</span><span id="info-time">—</span></div>
       </div>
-      <div class="table-wrap">
-        <div class="t-head" style="grid-template-columns:1fr 110px 70px 70px 60px;">
-          <span>שם</span><span>טלפון</span><span>שיעורים</span><span>אחרון</span><span></span>
-        </div>
-        <div id="clients-body"></div>
-      </div>
+      <button class="btn-primary" id="confirm-btn" onclick="goStep3()" style="opacity:.4;pointer-events:none">אשר שיעור ←</button>
+      <br><button class="btn-secondary" onclick="goStep1()">← חזרה</button>
     </div>
 
-    <!-- SCHEDULE TEMPLATES -->
-    <div class="page" id="page-schedule">
-      <!-- Month navigation -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
-        <button class="btn-outline" onclick="prevMonth()" style="padding:7px 14px;">→ חודש קודם</button>
-        <span style="font-size:16px;font-weight:700;" id="month-label"></span>
-        <button class="btn-outline" onclick="nextMonth()" style="padding:7px 14px;">← חודש הבא</button>
-        <button class="btn-save" onclick="publishMonth()" style="margin-right:auto;">🚀 פרסם חודש לאתר</button>
+    <div class="booking-card step" id="step3" style="text-align:center">
+      <div class="confirm-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff2d8a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-
-      <!-- Default slots selector -->
-      <div style="background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <span style="font-size:12px;font-weight:700;color:var(--muted);">שעות ברירת מחדל לימים פתוחים:</span>
-        <div id="default-slots-wrap" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;"></div>
-        <button class="add-slot-btn" onclick="addDefaultSlot()">+ שעה</button>
+      <div class="card-title" style="text-align:center">בקשתך נקלטה במערכת!</div>
+      <div class="card-sub" style="text-align:center;margin-bottom:14px">ממתינה לאישור — תקבל הודעה בוואטסאפ</div>
+      <div class="confirm-details" style="text-align:right">
+        <div class="confirm-row"><span>שם</span><span id="confirm-name">—</span></div>
+        <div class="confirm-row"><span>טלפון</span><span id="confirm-phone">—</span></div>
+        <div class="confirm-row"><span>יום</span><span id="confirm-day">—</span></div>
+        <div class="confirm-row"><span>תאריך</span><span id="confirm-date">—</span></div>
+        <div class="confirm-row"><span>שעה</span><span id="confirm-time">—</span></div>
+        <div class="confirm-row"><span>מיקום</span><span>The Club Lab</span></div>
       </div>
-
-      <!-- Calendar grid -->
-      <div style="background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);overflow:hidden;">
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);border-bottom:.5px solid var(--border);">
-          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">א</div>
-          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">ב</div>
-          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">ג</div>
-          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">ד</div>
-          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);">ה</div>
-          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:#ff2d8a;">ו</div>
-          <div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:#ff2d8a;">ש</div>
-        </div>
-        <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);"></div>
-      </div>
-
-      <!-- Day editor -->
-      <div id="day-editor" style="display:none;background:var(--surface);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:16px;margin-top:12px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <span style="font-size:14px;font-weight:700;" id="day-editor-title"></span>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:12px;color:var(--muted);" id="day-open-label">סגור</span>
-            <button class="toggle" id="day-toggle" onclick="toggleDayOpen()"></button>
-          </div>
-        </div>
-        <div id="day-slots-wrap" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-        <button class="add-slot-btn" onclick="addDaySlot()">+ שעה</button>
-        <button class="btn-save" style="margin-right:8px;font-size:12px;padding:7px 14px;" onclick="saveDayAndClose()">שמור יום ✓</button>
-      </div>
-    </div>
-
-    <!-- NEWS & TIPS EDITOR -->
-    <div class="page" id="page-content">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;">
-
-        <!-- NEWS -->
-        <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span id="news-section-title" style="font-size:15px;font-weight:700;">חדשות ועדכונים</span><span style="cursor:pointer;font-size:13px;color:var(--pink);margin-right:6px;" onclick="editSectionTitle('news-section-title')">✎</span>
-            <button class="btn-add-item" onclick="showAddNews()">+ חדשה חדשה</button>
-          </div>
-          <div id="add-news-form" style="display:none;background:var(--surface);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:13px;margin-bottom:10px;">
-            <input class="c-input" id="news-title-input" placeholder="כותרת" style="margin-bottom:7px;">
-            <textarea class="c-input c-textarea" id="news-body-input" placeholder="תוכן..."></textarea>
-            <div style="display:flex;gap:7px;margin-top:8px;">
-              <button class="btn-save" style="font-size:12px;padding:7px 14px;" onclick="addNewsItem()">הוסף</button>
-              <button class="btn-outline" style="font-size:12px;padding:7px 14px;" onclick="document.getElementById('add-news-form').style.display='none'">ביטול</button>
-            </div>
-          </div>
-          <div id="news-list" class="content-grid"></div>
-        </div>
-
-        <!-- TIPS -->
-        <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span id="tips-section-title" style="font-size:15px;font-weight:700;">טיפ של היום</span><span style="cursor:pointer;font-size:13px;color:var(--pink);margin-right:6px;" onclick="editSectionTitle('tips-section-title')">✎</span>
-            <button class="btn-add-item" onclick="showAddTip()">+ טיפ חדש</button>
-          </div>
-          <div id="add-tip-form" style="display:none;background:var(--surface);border:.5px solid var(--pink-border);border-radius:var(--radius);padding:13px;margin-bottom:10px;">
-            <input class="c-input" id="tip-title-input" placeholder="כותרת הטיפ" style="margin-bottom:7px;">
-            <textarea class="c-input c-textarea" id="tip-body-input" placeholder="תוכן הטיפ..."></textarea>
-            <div style="display:flex;gap:7px;margin-top:8px;">
-              <button class="btn-save" style="font-size:12px;padding:7px 14px;" onclick="addTipItem()">הוסף</button>
-              <button class="btn-outline" style="font-size:12px;padding:7px 14px;" onclick="document.getElementById('add-tip-form').style.display='none'">ביטול</button>
-            </div>
-          </div>
-          <div id="tips-list" class="content-grid"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- STATS -->
-    <div class="page" id="page-stats">
-      <div class="stat-row">
-        <div class="stat-card hl"><div class="stat-label">הכנסה החודש</div><div class="stat-val pink" id="stat-revenue">₪0</div></div>
-        <div class="stat-card"><div class="stat-label">שיעורים החודש</div><div class="stat-val" id="stat-appts">0</div></div>
-        <div class="stat-card"><div class="stat-label">תלמידים</div><div class="stat-val" id="stat-clients">0</div></div>
-        <div class="stat-card"><div class="stat-label">ביטולים</div><div class="stat-val" id="stat-cancels">0</div></div>
-      </div>
-      <div class="stats-grid">
-        <div class="chart-card"><div class="chart-title">שיעורים לפי יום</div><div class="bar-chart" id="bar-chart"></div></div>
-        <div class="chart-card"><div class="chart-title">מדדי ביצוע</div><div class="kpi-list">
-          <div class="kpi-row"><span>שיעור אישור</span><span class="up" id="kpi-confirm">—</span></div>
-          <div class="kpi-row"><span>שיעור ביטול</span><span class="down" id="kpi-cancel">—</span></div>
-          <div class="kpi-row"><span>תלמידים חוזרים</span><span class="up">71%</span></div>
-          <div class="kpi-row"><span>ממוצע/שיעור</span><span id="kpi-avg">₪113</span></div>
-        </div></div>
-        <div class="chart-card"><div class="chart-title">פיצול בוקר/ערב</div><div id="time-split"></div></div>
-        <div class="chart-card"><div class="chart-title">סוגי שיעורים</div><div class="kpi-list" id="type-breakdown"></div></div>
-      </div>
+      <button class="btn-secondary" onclick="bookAgain()">קביעת שיעור נוסף</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
-<!-- Edit Client Modal -->
-<div class="modal-overlay" id="edit-client-modal">
-  <div class="modal">
-    <div class="modal-title"><span>עריכת תלמיד</span><button class="modal-close" onclick="document.getElementById('edit-client-modal').classList.remove('open')">×</button></div>
-    <div class="modal-field"><label>שם תלמיד</label><input class="modal-input" id="ec-name" placeholder="שם מלא"></div>
-    <div class="modal-field"><label>טלפון</label><input class="modal-input" id="ec-phone" placeholder="05X-XXXXXXX" dir="ltr"></div>
-    <div class="modal-field"><label>סוג שיעור</label>
-      <select class="modal-input" id="ec-type"><option>DJ מתחיל</option><option>הפקה מוזיקלית</option><option>מיקסינג מתקדם</option></select>
-    </div>
-    <div class="modal-field" style="display:flex;gap:7px;">
-      <div style="flex:1"><label>יום</label>
-        <select class="modal-input" id="ec-day"><option>ראשון</option><option>שני</option><option>שלישי</option><option>רביעי</option><option>חמישי</option></select>
-      </div>
-      <div style="flex:1"><label>שעה</label>
-        <select class="modal-input" id="ec-time"><option>10:30</option><option>12:30</option><option>20:00</option><option>20:30</option><option>22:00</option><option>22:30</option></select>
-      </div>
-    </div>
-    <div class="modal-btns"><button class="modal-cancel" onclick="document.getElementById('edit-client-modal').classList.remove('open')">ביטול</button><button class="modal-save" onclick="saveEditClient()">שמור ✓</button></div>
+<div class="divider"></div>
+<div class="section" id="tips">
+  <div class="section-header"><div class="section-line line-yellow"></div><h2 id="tips-section-title">טיפ של היום</h2></div>
+  <div class="tips-grid" id="tips-grid">
+    <div class="tip-card"><div class="tip-num">טוען...</div></div>
   </div>
 </div>
-<!-- Edit Content Modal -->
-<div class="modal-overlay" id="edit-content-modal">
-  <div class="modal">
-    <div class="modal-title"><span id="edit-content-title">עריכה</span><button class="modal-close" onclick="document.getElementById('edit-content-modal').classList.remove('open')">×</button></div>
-    <div class="modal-field"><label>כותרת</label><input class="modal-input" id="econ-title" placeholder="כותרת"></div>
-    <div class="modal-field"><label>תוכן</label><textarea class="modal-input" id="econ-body" style="height:80px;resize:vertical;font-family:inherit;"></textarea></div>
-    <div class="modal-btns"><button class="modal-cancel" onclick="document.getElementById('edit-content-modal').classList.remove('open')">ביטול</button><button class="modal-save" onclick="saveEditContent()">שמור ✓</button></div>
+
+<div class="divider"></div>
+<div class="section" id="news">
+  <div class="section-header"><div class="section-line line-pink"></div><h2 id="news-section-title">חדשות ועדכונים</h2></div>
+  <div class="news-grid" id="news-grid">
+    <div class="news-card"><div class="news-dot" style="background:#ff2d8a"></div><div><div class="news-date"></div><div class="news-title">טוען...</div></div></div>
   </div>
 </div>
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <div class="modal-title"><span>שיעור חדש</span><button class="modal-close" onclick="closeModal()">×</button></div>
-    <div class="modal-field"><label>שם תלמיד</label><input class="modal-input" id="m-name" placeholder="שם מלא"></div>
-    <div class="modal-field"><label>טלפון</label><input class="modal-input" id="m-phone" placeholder="05X-XXXXXXX" dir="ltr"></div>
-    <div class="modal-field"><label>סוג שיעור</label>
-      <select class="modal-input" id="m-type"><option>DJ מתחיל</option><option>הפקה מוזיקלית</option><option>מיקסינג מתקדם</option></select>
-    </div>
-    <div class="modal-field" style="display:flex;gap:7px;">
-      <div style="flex:1"><label>יום</label>
-        <select class="modal-input" id="m-day"><option>ראשון</option><option>שני</option><option>שלישי</option><option>רביעי</option><option>חמישי</option></select>
-      </div>
-      <div style="flex:1"><label>שעה</label>
-        <select class="modal-input" id="m-time"><option>10:30</option><option>12:30</option><option>20:00</option><option>20:30</option><option>22:00</option><option>22:30</option></select>
-      </div>
-    </div>
-    <div class="modal-btns"><button class="modal-cancel" onclick="closeModal()">ביטול</button><button class="modal-save" onclick="saveAppt()">שמור ✓</button></div>
-  </div>
+
+<footer>
+  <img class="footer-logo" src="/images/logo.jpg" alt="logo">
+  © 2026 The Club Lab · כל הזכויות שמורות
+</footer>
 </div>
 
 <script>
-const API='';
-let allAppts=[],allClients=[],allSchedule=[],allLessons=[];
-let templates={};
-let activeTemplate='';
-let newsItems=[];
-let tipsItems=[];
+const WA='972548008645';
+const ADMIN_WA='972548008645';
+let selDay='',selDate='',selIsoDate='',selTime='',phone='',studentName='';
 
-// ── INIT ──
-async function init(){
-  const now=new Date();
-  document.getElementById('today-label').textContent=now.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
-  const ds=now.getDate()+'.'+(now.getMonth()+1);
-  document.getElementById('diary-date').textContent=ds;
-  document.getElementById('diary-date2').textContent=ds;
-  loadMonth();
-  await loadContentFromStorage();
-  await Promise.all([loadDiary(),loadClients(),loadStats()]);
+function getSaved(){try{return JSON.parse(localStorage.getItem('clublab_user'))||null;}catch(e){return null;}}
+function setSaved(n,p){localStorage.setItem('clublab_user',JSON.stringify({name:n,phone:p}));}
+function clearPhone(){
+  localStorage.removeItem('clublab_user');phone='';studentName='';
+  document.getElementById('saved-banner').style.display='none';
+  document.getElementById('phone-form').style.display='block';
+  document.getElementById('phone-field').value='';
+  document.getElementById('name-field').value='';
 }
 
-// ── DIARY ──
-async function loadDiary(){
-  try{
-    const res=await fetch(API+'/api/appointments/today');
-    const appts=await res.json();
-    allAppts=appts;
-    renderAppts('morning-list',appts.filter(a=>parseInt(a.time)<18));
-    renderAppts('evening-list',appts.filter(a=>parseInt(a.time)>=18));
-    document.getElementById('diary-stats').innerHTML=`
-      <div class="stat-card hl"><div class="stat-label">תורים היום</div><div class="stat-val pink">${appts.length}</div></div>
-      <div class="stat-card"><div class="stat-label">ממתינים</div><div class="stat-val">${appts.filter(a=>a.status==='pending').length}</div></div>
-      <div class="stat-card"><div class="stat-label">אושרו</div><div class="stat-val">${appts.filter(a=>a.status==='confirmed').length}</div></div>
-      <div class="stat-card"><div class="stat-label">בוטלו</div><div class="stat-val">${appts.filter(a=>a.status==='cancelled').length}</div></div>`;
-  }catch(e){console.error(e);}
-}
-
-function renderAppts(cid,appts){
-  const el=document.getElementById(cid);
-  if(!appts.length){el.innerHTML='<div class="empty-slot" onclick="openModal()">+ הוסף שיעור</div>';return;}
-  el.innerHTML=appts.map(a=>{
-    const ph=(a.phone||'').replace(/[^0-9]/g,'');
-    const nm=(a.name||'').replace(/'/g,'`');
-    const dy=(a.day||'').replace(/'/g,'`');
-    const dt=(a.date||'').replace(/'/g,'`');
-    const tm=(a.time||'').replace(/'/g,'`');
-    return`<div class="appt ${a.status}">
-      <span class="appt-time">${a.time}</span>
-      <div class="appt-info"><div class="appt-name">${a.name||a.phone}</div><div class="appt-type">${a.phone||''}</div></div>
-      <span class="appt-status s-${a.status}" onclick="cycleStatus('${a._id}','${a.status}','${ph}','${nm}','${dy}','${dt}','${tm}')">${a.status==='confirmed'?'אושר':a.status==='pending'?'ממתין':'בוטל'}</span>
-      <button style="background:${a.status==='pending'?'#25D366':'transparent'};border:${a.status==='pending'?'none':'1px solid var(--border)'};border-radius:6px;color:${a.status==='pending'?'#fff':'var(--muted)'};font-size:11px;font-weight:700;padding:3px 8px;cursor:pointer;display:${a.status==='pending'?'inline-block':'none'};" onclick="approveAndNotify('${a._id}','${ph}','${nm}','${dy}','${dt}','${tm}')">✓ אשר</button>
-      <button class="del-btn" onclick="delAppt('${a._id}')">✕</button>
-    </div>`;
-  }).join('')+'<div class="empty-slot" onclick="openModal()">+ הוסף שיעור</div>';
-}
-
-async function cycleStatus(id,cur,phone,name,day,date,time){
-  const next=cur==='pending'?'confirmed':cur==='confirmed'?'cancelled':'pending';
-  await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});
-  if(next==='confirmed'&&phone){
-    const msg=encodeURIComponent('🎧 שלום '+name+'!\nהשיעור שלך אושר ✅\nיום: '+day+(date?' ('+date+')':'')+'\nשעה: '+time+'\nמיקום: The Club Lab\nנתראה! 🎶');
-    window.open('https://wa.me/972'+phone.replace(/^0/,'')+'?text='+msg,'_blank');
+function initPhone(){
+  const s=getSaved();
+  if(s){
+    phone=s.phone;studentName=s.name;
+    document.getElementById('saved-num').textContent=s.name+' · +972-'+s.phone;
+    document.getElementById('saved-banner').style.display='flex';
+    document.getElementById('phone-form').style.display='none';
   }
-  loadDiary();
 }
 
-async function approveAndNotify(id,phone,name,day,date,time){
-  await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'confirmed'})});
-  if(phone){
-    const msg=encodeURIComponent('🎧 שלום '+name+'!\nהשיעור שלך אושר ✅\nיום: '+day+(date?' ('+date+')':'')+'\nשעה: '+time+'\nמיקום: The Club Lab\nנתראה! 🎶');
-    window.open('https://wa.me/972'+phone.replace(/^0/,'')+'?text='+msg,'_blank');
-  }
-  loadDiary();
-}
-async function delAppt(id){
-  if(!confirm('למחוק שיעור?'))return;
-  await fetch(API+'/api/appointments/'+id,{method:'DELETE'});
-  loadDiary();loadAllLessons();loadStats();
-}
-
-// ── ALL LESSONS ──
-async function loadAllLessons(){
-  const res=await fetch(API+'/api/appointments');
-  allLessons=await res.json();
-  renderLessons(allLessons);
-}
-function renderLessons(list){
-  const sc={confirmed:'var(--pink)',pending:'#ffd166',cancelled:'var(--muted)'};
-  const sl={confirmed:'אושר',pending:'ממתין',cancelled:'בוטל'};
-  document.getElementById('lessons-body').innerHTML=list.length?list.map(a=>`
-    <div class="t-row" style="grid-template-columns:1fr 100px 60px 60px 90px 40px;align-items:center;">
-      <span style="font-weight:600">${a.name||'—'}</span>
-      <span style="color:var(--muted);font-size:12px;direction:ltr">${(a.phone||'').replace('+972-','')}</span>
-      <span style="color:var(--muted);font-size:12px">${a.day||'—'}</span>
-      <span style="color:var(--muted);font-size:12px">${a.date||'—'}</span>
-      <span style="font-size:12px;color:${sc[a.status]};font-weight:600">${sl[a.status]||''} · ${a.time||''}</span>
-      <button class="del-btn" onclick="delLesson('${a._id}')">✕</button>
-    </div>`).join(''):'<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">אין שיעורים עדיין</div>';
-}
-function filterLessons(q){
-  const status=document.getElementById('status-filter')?.value||'';
-  let f=allLessons;
-  if(q)f=f.filter(a=>(a.name||'').includes(q)||(a.phone||'').includes(q));
-  if(status)f=f.filter(a=>a.status===status);
-  renderLessons(f);
-}
-async function delLesson(id){
-  if(!confirm('למחוק שיעור?'))return;
-  await fetch(API+'/api/appointments/'+id,{method:'DELETE'});
-  loadAllLessons();loadDiary();loadStats();
-}
-
-// ── CLIENTS ──
-async function loadClients(){
-  const res=await fetch(API+'/api/clients');
-  allClients=await res.json();
-  renderClients(allClients);
-}
-function renderClients(list){
-  document.getElementById('clients-body').innerHTML=list.map(c=>{
-    const ini=(c.name||'תל').split(' ').map(w=>w[0]).join('').slice(0,2);
-    const last=c.lastVisit?new Date(c.lastVisit).toLocaleDateString('he-IL',{day:'numeric',month:'numeric'}):'—';
-    return`<div class="t-row" style="grid-template-columns:1fr 110px 70px 70px 60px;align-items:center;">
-      <span style="display:flex;align-items:center;gap:7px;font-weight:600"><span class="avatar">${ini}</span>${c.name||c.phone}</span>
-      <span style="color:var(--muted);direction:ltr;font-size:12px">${c.phone}</span>
-      <span><span class="vbadge">${c.visits||0}</span></span>
-      <span style="color:var(--muted);font-size:12px">${last}</span>
-      <span style="color:var(--pink);font-size:12px;cursor:pointer" onclick="openEditClient(this)" data-id="${c._id||c.id}" data-name="${(c.name||'').replace(/"/g,'&quot;')}" data-phone="${(c.phone||'').replace(/"/g,'&quot;')}" data-type="${(c.type||'').replace(/"/g,'&quot;')}" data-day="${(c.day||'').replace(/"/g,'&quot;')}" data-time="${(c.time||'').replace(/"/g,'&quot;')}">✎</span>
-    </div>`;
-  }).join('');
-}
-function filterClients(q){renderClients(allClients.filter(c=>(c.name||'').includes(q)||(c.phone||'').includes(q)));}
-
-// ── MONTHLY CALENDAR ──
-const DEFAULT_SLOTS=['10:30','12:30','20:00','22:00'];
-let currentYear=new Date().getFullYear();
-let currentMonth=new Date().getMonth()+1;
-let monthData={};
-let defaultSlots=[...DEFAULT_SLOTS];
-let editingDate=null;
-
-function prevMonth(){
-  currentMonth--;
-  if(currentMonth<1){currentMonth=12;currentYear--;}
-  loadMonth();
-}
-function nextMonth(){
-  currentMonth++;
-  if(currentMonth>12){currentMonth=1;currentYear++;}
-  loadMonth();
-}
-
-async function loadMonth(){
-  const label=new Date(currentYear,currentMonth-1,1).toLocaleDateString('he-IL',{month:'long',year:'numeric'});
-  document.getElementById('month-label').textContent=label;
+async function loadSchedule(){
+  document.getElementById('week-label').textContent='טוען...';
+  document.getElementById('schedule-rows').innerHTML='';
+  document.getElementById('offline-msg')&&document.getElementById('offline-msg').remove();
   try{
-    const res=await fetch(API+'/api/monthly/'+currentYear+'/'+currentMonth);
-    const days=await res.json();
-    monthData={};
-    days.forEach(d=>monthData[d.date]=d);
-  }catch(e){monthData={};}
-  renderCalendar();
-  renderDefaultSlots();
-}
-
-function renderDefaultSlots(){
-  document.getElementById('default-slots-wrap').innerHTML=defaultSlots.map(t=>`
-    <span class="slot-tag slot-${parseInt(t)<18?'morning':'evening'}" style="cursor:pointer">
-      ${t}<span class="sx" onclick="removeDefaultSlot('${t}')"> ✕</span>
-    </span>`).join('');
-}
-
-function addDefaultSlot(){
-  const t=prompt('הכנס שעה (לדוגמה 14:00):');
-  if(!t||!/^\d{1,2}:\d{2}$/.test(t))return;
-  if(!defaultSlots.includes(t))defaultSlots.push(t);
-  defaultSlots.sort();
-  renderDefaultSlots();
-}
-function removeDefaultSlot(t){
-  defaultSlots=defaultSlots.filter(s=>s!==t);
-  renderDefaultSlots();
-}
-
-function renderCalendar(){
-  const grid=document.getElementById('cal-grid');
-  const firstDay=new Date(currentYear,currentMonth-1,1).getDay();
-  const daysInMonth=new Date(currentYear,currentMonth,0).getDate();
-  const today=new Date().toISOString().split('T')[0];
-  let html='';
-  for(let i=0;i<firstDay;i++) html+='<div style="min-height:60px;border:.5px solid var(--border);opacity:.3;"></div>';
-  for(let d=1;d<=daysInMonth;d++){
-    const date=`${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayOfWeek=new Date(date+'T12:00:00').getDay();
-    const isSunToThu=dayOfWeek>=0&&dayOfWeek<=4;
-    // Use DB data if exists, otherwise default open Sun-Thu
-    const dayData=monthData[date]||{date,open:isSunToThu,slots:isSunToThu?[...defaultSlots]:[]};
-    const isOpen=dayData.open;
-    const slots=dayData.slots||[];
-    const isToday=date===today;
-    const isPast=date<today;
-    html+=`<div onclick="openDayEditor('${date}')" style="min-height:60px;border:.5px solid var(--border);padding:5px;cursor:pointer;transition:background .15s;background:${isOpen?'rgba(255,45,138,.06)':isPast?'rgba(0,0,0,.03)':'var(--surface)'};${isToday?'border-color:var(--pink);':''}">
-      <div style="font-size:11px;font-weight:700;color:${isToday?'var(--pink)':isPast?'var(--muted)':'var(--text)'};">${d}</div>
-      ${isOpen?`<div style="margin-top:3px;"><span style="font-size:9px;background:var(--pink);color:#fff;border-radius:4px;padding:1px 5px;">פתוח</span></div><div style="font-size:9px;color:var(--muted);margin-top:2px;">${slots.length} שעות</div>`:'<div style="font-size:9px;color:var(--muted);margin-top:3px;">סגור</div>'}
-    </div>`;
-  }
-  grid.innerHTML=html;
-}
-
-function openDayEditor(date){
-  editingDate=date;
-  const dayOfWeek=new Date(date+'T12:00:00').getDay();
-  const isSunToThu=dayOfWeek>=0&&dayOfWeek<=4;
-  const dayData=monthData[date]||{date,open:isSunToThu,slots:isSunToThu?[...defaultSlots]:[]};
-  if(!monthData[date]) monthData[date]=dayData;
-  const d=new Date(date+'T12:00:00');
-  document.getElementById('day-editor-title').textContent=d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
-  const tog=document.getElementById('day-toggle');
-  tog.classList.toggle('on',dayData.open);
-  document.getElementById('day-open-label').textContent=dayData.open?'פתוח':'סגור';
-  if(!dayData.slots||!dayData.slots.length) dayData.slots=[...defaultSlots];
-  renderDaySlots(dayData.slots);
-  document.getElementById('day-editor').style.display='block';
-  document.getElementById('day-editor').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-function renderDaySlots(slots){
-  document.getElementById('day-slots-wrap').innerHTML=slots.map(t=>`
-    <span class="slot-tag slot-${parseInt(t)<18?'morning':'evening'}">
-      ${t}<span class="sx" onclick="removeDaySlot('${t}')"> ✕</span>
-    </span>`).join('');
-}
-
-function toggleDayOpen(){
-  const tog=document.getElementById('day-toggle');
-  tog.classList.toggle('on');
-  document.getElementById('day-open-label').textContent=tog.classList.contains('on')?'פתוח':'סגור';
-}
-
-function addDaySlot(){
-  const t=prompt('הכנס שעה (לדוגמה 14:00):');
-  if(!t||!/^\d{1,2}:\d{2}$/.test(t))return;
-  const dayData=monthData[editingDate]||{date:editingDate,open:false,slots:[]};
-  if(!dayData.slots.includes(t))dayData.slots.push(t);
-  dayData.slots.sort();
-  monthData[editingDate]=dayData;
-  renderDaySlots(dayData.slots);
-}
-
-function removeDaySlot(t){
-  const dayData=monthData[editingDate];
-  if(!dayData)return;
-  dayData.slots=dayData.slots.filter(s=>s!==t);
-  renderDaySlots(dayData.slots);
-}
-
-async function saveDayAndClose(){
-  if(!editingDate)return;
-  const tog=document.getElementById('day-toggle');
-  const slots=Array.from(document.querySelectorAll('#day-slots-wrap .slot-tag')).map(el=>el.textContent.trim().replace('✕','').trim());
-  const dayData={date:editingDate,open:tog.classList.contains('on'),slots};
-  monthData[editingDate]=dayData;
-  try{
-    await fetch(API+'/api/monthly/day/'+editingDate,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(dayData)});
-  }catch(e){console.error(e);}
-  document.getElementById('day-editor').style.display='none';
-  editingDate=null;
-  renderCalendar();
-}
-
-async function publishMonth(){
-  const days=Object.values(monthData);
-  if(!days.length){alert('אין שינויים לפרסם');return;}
-  try{
-    await fetch(API+'/api/monthly/month',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(days)});
-    alert('הלוח החודשי פורסם! 🚀');
-  }catch(e){alert('שגיאה בפרסום');}
-}
-
-
-// ── NEWS & TIPS ──
-async function loadContentFromStorage(){
-  try{
-    const [news,tips]=await Promise.all([
-      fetch(API+'/api/content/news').then(r=>r.json()),
-      fetch(API+'/api/content/tips').then(r=>r.json())
+    const today=new Date();
+    const from=today.toISOString().split('T')[0];
+    const futureDate=new Date(today);
+    futureDate.setDate(today.getDate()+28);
+    const to=futureDate.toISOString().split('T')[0];
+    const [available,appts]=await Promise.all([
+      fetch('/api/monthly/available/'+from+'/'+to,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()),
+      fetch('/api/appointments',{signal:AbortSignal.timeout(8000)}).then(r=>r.json())
     ]);
-    newsItems=news;
-    tipsItems=tips;
+    const booked=appts.filter(a=>a.status!=='cancelled').map(a=>a.date+'_'+a.time);
+    if(!available.length){
+      document.getElementById('week-label').textContent='אין זמינות כרגע';
+      return;
+    }
+    document.getElementById('week-label').textContent=formatDayName(available[0].date)+' '+formatDate(available[0].date)+' – '+formatDayName(available[available.length-1].date)+' '+formatDate(available[available.length-1].date);
+    const rows=document.getElementById('schedule-rows');rows.innerHTML='';
+    const dayNames=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+    available.forEach(day=>{
+      const d=new Date(day.date+'T12:00:00');
+      const dayName=dayNames[d.getDay()];
+      const ds=d.getDate()+'.'+(d.getMonth()+1);
+      const row=document.createElement('div');row.className='day-row';
+      row.innerHTML='<span class="day-label">'+dayName+'<br><span style="font-size:10px;color:var(--muted);font-weight:400">'+ds+'</span></span><div class="slots"></div>';
+      rows.appendChild(row);
+      const sd=row.querySelector('.slots');
+      (day.slots||[]).forEach(t=>{
+        const ev=parseInt(t)>=18,bk=booked.includes(ds+'_'+t);
+        const s=document.createElement('div');
+        s.className='slot'+(ev?' evening':'')+(bk?' booked':'');
+        s.textContent=t;
+        if(!bk)s.onclick=()=>pick(s,dayName,ds,t,day.date);
+        sd.appendChild(s);
+      });
+    });
   }catch(e){
-    newsItems=[
-      {id:1,date:'17 מרץ 2026',title:'לו"ז שבועי עלה לאוויר',body:'שעות הבוקר והערב זמינות לקביעה. ימי ראשון–חמישי פתוחים.'},
-      {id:2,date:'10 מרץ 2026',title:'שיפורים במערכת הקביעה',body:'אישורים ישירות לוואטסאפ תוך שניות מסיום הקביעה.'},
-    ];
-    tipsItems=[
-      {id:1,num:'01',title:'EQ לפני Compressor',body:'תמיד תנקה את הצליל עם EQ לפני שאתה מדחס.'},
-      {id:2,num:'02',title:'Gain Staging נכון',body:'שמור על רמות כניסה בין -18 ל-12 dBFS.'},
-      {id:3,num:'03',title:'מעברים חלקים',body:'תרגל מעבר בין שירים ב-phrase של 8 beats.'},
-    ];
-  }
-  renderNews();renderTips();
-}
-async function saveContent(){
-  try{
-    await Promise.all([
-      fetch(API+'/api/content/news',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(newsItems)}),
-      fetch(API+'/api/content/tips',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(tipsItems)})
-    ]);
-  }catch(e){console.error('save content error',e);}
-}
-
-function renderNews(){
-  document.getElementById('news-list').innerHTML=newsItems.map(n=>`
-    <div class="content-card">
-      <div class="content-card-head">
-        <div><div class="item-title">${n.title}</div><div class="item-body" style="margin-top:3px">${n.date}</div></div>
-        <div style="display:flex;gap:4px">
-          <button class="item-del" data-type="news" data-id="${n._id||n.id}" data-title="${(n.title||'').replace(/"/g,'&quot;')}" data-body="${(n.body||'').replace(/"/g,'&quot;')}" onclick="openEditContent(this)">✎</button>
-          <button class="item-del" onclick="deleteNews('${n._id||n.id}')">✕</button>
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6">${n.body}</div>
-    </div>`).join('')||'<div style="color:var(--muted);font-size:13px;padding:12px">אין חדשות עדיין</div>';
-}
-
-function renderTips(){
-  document.getElementById('tips-list').innerHTML=tipsItems.map(t=>`
-    <div class="content-card">
-      <div class="content-card-head">
-        <div><div style="font-size:11px;font-weight:700;color:#ffd166;margin-bottom:3px">טיפ #${t.num}</div><div class="item-title">${t.title}</div></div>
-        <div style="display:flex;gap:4px">
-          <button class="item-del" data-type="tip" data-id="${t._id||t.id}" data-title="${(t.title||'').replace(/"/g,'&quot;')}" data-body="${(t.body||'').replace(/"/g,'&quot;')}" onclick="openEditContent(this)">✎</button>
-          <button class="item-del" onclick="deleteTip('${t._id||t.id}')">✕</button>
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6">${t.body}</div>
-    </div>`).join('')||'<div style="color:var(--muted);font-size:13px;padding:12px">אין טיפים עדיין</div>';
-}
-
-function showAddNews(){document.getElementById('add-news-form').style.display='block';}
-async function addNewsItem(){
-  const title=document.getElementById('news-title-input').value.trim();
-  const body=document.getElementById('news-body-input').value.trim();
-  if(!title)return;
-  const today=new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
-  try{
-    const res=await fetch(API+'/api/content',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'news',title,body,date:today})});
-    const item=await res.json();
-    newsItems.unshift(item);
-    renderNews();
-  }catch(e){console.error(e);}
-  document.getElementById('add-news-form').style.display='none';
-  document.getElementById('news-title-input').value='';
-  document.getElementById('news-body-input').value='';
-}
-async function deleteNews(id){
-  if(!confirm('למחוק?'))return;
-  try{
-    await fetch(API+'/api/content/'+id,{method:'DELETE'});
-    newsItems=newsItems.filter(n=>(n._id||n.id)!=id);
-    renderNews();
-  }catch(e){console.error(e);}
-}
-
-function showAddTip(){document.getElementById('add-tip-form').style.display='block';}
-async function addTipItem(){
-  const title=document.getElementById('tip-title-input').value.trim();
-  const body=document.getElementById('tip-body-input').value.trim();
-  if(!title)return;
-  const num=String(tipsItems.length+1).padStart(2,'0');
-  try{
-    const res=await fetch(API+'/api/content',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'tip',title,body,num,order:tipsItems.length})});
-    const item=await res.json();
-    tipsItems.push(item);
-    renderTips();
-  }catch(e){console.error(e);}
-  document.getElementById('add-tip-form').style.display='none';
-  document.getElementById('tip-title-input').value='';
-  document.getElementById('tip-body-input').value='';
-}
-async function deleteTip(id){
-  if(!confirm('למחוק?'))return;
-  try{
-    await fetch(API+'/api/content/'+id,{method:'DELETE'});
-    tipsItems=tipsItems.filter(t=>(t._id||t.id)!=id);
-    tipsItems.forEach((t,i)=>t.num=String(i+1).padStart(2,'0'));
-    renderTips();
-  }catch(e){console.error(e);}
-}
-
-// ── STATS ──
-async function loadStats(){
-  try{
-    const [appts,clients]=await Promise.all([fetch(API+'/api/appointments').then(r=>r.json()),fetch(API+'/api/clients').then(r=>r.json())]);
-    document.getElementById('stat-appts').textContent=appts.length;
-    document.getElementById('stat-clients').textContent=clients.length;
-    document.getElementById('stat-cancels').textContent=appts.filter(a=>a.status==='cancelled').length;
-    document.getElementById('stat-revenue').textContent='₪'+(appts.filter(a=>a.status==='confirmed').length*113).toLocaleString();
-    const confirmed=appts.filter(a=>a.status==='confirmed').length;
-    const cancelled=appts.filter(a=>a.status==='cancelled').length;
-    const total=appts.length||1;
-    document.getElementById('kpi-confirm').textContent=Math.round(confirmed/total*100)+'%';
-    document.getElementById('kpi-cancel').textContent=Math.round(cancelled/total*100)+'%';
-    const days=['א','ב','ג','ד','ה'];
-    const dc=days.map((_,i)=>appts.filter(a=>new Date(a.createdAt).getDay()===i).length);
-    const mx=Math.max(...dc,1);
-    document.getElementById('bar-chart').innerHTML=days.map((d,i)=>`<div class="bar-wrap"><span class="bar-val">${dc[i]}</span><div class="bar ${dc[i]===mx?'full':''}" style="height:${Math.round(dc[i]/mx*68)}px"></div><span class="bar-label">${d}</span></div>`).join('');
-    const morning=appts.filter(a=>parseInt(a.time||'0')<18).length;
-    const evening=appts.length-morning;
-    document.getElementById('time-split').innerHTML=`<div style="margin-top:6px">
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--muted)">בוקר</span><span>${Math.round(morning/total*100)}%</span></div>
-      <div style="height:5px;border-radius:3px;background:var(--surface3);overflow:hidden"><div style="width:${Math.round(morning/total*100)}%;height:100%;background:#6ee7ff;border-radius:3px"></div></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:9px;margin-bottom:4px"><span style="color:var(--muted)">ערב</span><span>${Math.round(evening/total*100)}%</span></div>
-      <div style="height:5px;border-radius:3px;background:var(--surface3);overflow:hidden"><div style="width:${Math.round(evening/total*100)}%;height:100%;background:var(--pink);border-radius:3px"></div></div>
+    document.getElementById('week-label').textContent='';
+    const rows=document.getElementById('schedule-rows');
+    rows.innerHTML=`<div id="offline-msg" style="background:rgba(255,45,138,0.08);border:1px solid rgba(255,45,138,0.3);border-radius:12px;padding:20px 16px;text-align:center;margin:8px 0;">
+      <div style="font-size:22px;margin-bottom:8px;">⚡</div>
+      <div style="font-size:15px;font-weight:700;color:#f5f5f5;margin-bottom:6px;">המערכת עמוסה כרגע</div>
+      <div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">השרת עמוס — אנא המתן מספר שניות ונסה שוב</div>
+      <button onclick="loadSchedule()" style="background:#ff2d8a;border:none;border-radius:10px;color:#fff;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;padding:11px 24px;cursor:pointer;">נסה שוב ←</button>
     </div>`;
-    const types={};
-    appts.forEach(a=>{if(a.type)types[a.type]=(types[a.type]||0)+1;});
-    document.getElementById('type-breakdown').innerHTML=Object.entries(types).sort((a,b)=>b[1]-a[1]).map(([t,c])=>`<div class="kpi-row"><span>${t}</span><span>${c} שיעורים</span></div>`).join('')||'<div style="color:var(--muted);font-size:12px">אין נתונים</div>';
-  }catch(e){}
-}
-
-// ── NAVIGATION ──
-function toggleSidebar(){
-  document.querySelector('.sidebar').classList.toggle('open');
-  document.getElementById('mob-overlay').classList.toggle('open');
-}
-function showPage(id,btn){
-  document.querySelector('.sidebar').classList.remove('open');
-  document.getElementById('mob-overlay').classList.remove('open');
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  btn.classList.add('active');
-  const titles={diary:'יומן',clients:'תלמידים',schedule:'לוח חודשי',stats:'סטטיסטיקות',lessons:'כל השיעורים',content:'חדשות וטיפים'};
-  document.getElementById('page-title').textContent=titles[id]||id;
-  document.getElementById('top-add-btn').style.display=id==='diary'?'block':'none';
-  if(id==='stats')loadStats();
-  if(id==='clients')loadClients();
-  if(id==='diary')loadDiary();
-  if(id==='lessons')loadAllLessons();
-  if(id==='schedule')loadMonth();
-}
-
-// ── MODAL ──
-function openModal(){document.getElementById('modal').classList.add('open');}
-function closeModal(){document.getElementById('modal').classList.remove('open');}
-async function saveAppt(){
-  const body={name:document.getElementById('m-name').value,phone:document.getElementById('m-phone').value,type:document.getElementById('m-type').value,day:document.getElementById('m-day').value,time:document.getElementById('m-time').value,status:'confirmed'};
-  await fetch(API+'/api/appointments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  closeModal();loadDiary();
-}
-document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
-// ── EDIT CLIENT ──
-let editingClientId=null;
-function openEditClient(el){
-  editingClientId=el.dataset.id;
-  document.getElementById('ec-name').value=el.dataset.name||'';
-  document.getElementById('ec-phone').value=el.dataset.phone||'';
-  const typeEl=document.getElementById('ec-type');
-  const tv=el.dataset.type||'';[...typeEl.options].forEach(o=>{if(o.value===tv||o.text===tv)typeEl.value=o.value;});
-  const dayEl=document.getElementById('ec-day');
-  const dv=el.dataset.day||'';[...dayEl.options].forEach(o=>{if(o.value===dv||o.text===dv)dayEl.value=o.value;});
-  const timeEl=document.getElementById('ec-time');
-  const tiv=el.dataset.time||'';[...timeEl.options].forEach(o=>{if(o.value===tiv||o.text===tiv)timeEl.value=o.value;});
-  document.getElementById('edit-client-modal').classList.add('open');
-}
-async function saveEditClient(){
-  const body={name:document.getElementById('ec-name').value,phone:document.getElementById('ec-phone').value,type:document.getElementById('ec-type').value,day:document.getElementById('ec-day').value,time:document.getElementById('ec-time').value};
-  try{await fetch(API+'/api/clients/'+editingClientId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}catch(e){}
-  const idx=allClients.findIndex(c=>(c._id||c.id)==editingClientId);
-  if(idx>-1)allClients[idx]={...allClients[idx],...body};
-  document.getElementById('edit-client-modal').classList.remove('open');
-  renderClients(allClients);
-}
-document.getElementById('edit-client-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
-
-// ── EDIT NEWS / TIPS ──
-let editingContentType=null,editingContentId=null;
-function openEditContent(el){
-  editingContentType=el.dataset.type;
-  editingContentId=el.dataset.id;
-  document.getElementById('edit-content-title').textContent=editingContentType==='news'?'עריכת חדשה':'עריכת טיפ';
-  document.getElementById('econ-title').value=el.dataset.title||'';
-  document.getElementById('econ-body').value=el.dataset.body||'';
-  document.getElementById('edit-content-modal').classList.add('open');
-}
-async function saveEditContent(){
-  const title=document.getElementById('econ-title').value.trim();
-  const body=document.getElementById('econ-body').value.trim();
-  if(!title)return;
-  try{await fetch(API+'/api/content/'+editingContentId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,body})});}catch(e){}
-  if(editingContentType==='news'){
-    const idx=newsItems.findIndex(n=>(n._id||n.id)==editingContentId);
-    if(idx>-1){newsItems[idx].title=title;newsItems[idx].body=body;}
-    renderNews();
-  }else{
-    const idx=tipsItems.findIndex(t=>(t._id||t.id)==editingContentId);
-    if(idx>-1){tipsItems[idx].title=title;tipsItems[idx].body=body;}
-    renderTips();
   }
-  document.getElementById('edit-content-modal').classList.remove('open');
 }
-document.getElementById('edit-content-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+function formatDate(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  return d.getDate()+'.'+(d.getMonth()+1);
+}
+function formatDayName(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  return ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'][d.getDay()];
+}
 
-// ── EDIT SECTION TITLES ──
-function editSectionTitle(id){
-  const el=document.getElementById(id);if(!el)return;
-  const current=el.textContent;
-  const input=document.createElement('input');
-  input.value=current;
-  input.style.cssText='font-size:15px;font-weight:700;background:var(--surface2);border:0.5px solid var(--pink-border);border-radius:6px;padding:2px 8px;color:var(--text);font-family:inherit;width:200px;';
-  el.replaceWith(input);input.focus();input.select();
-  function done(){
-    const val=input.value.trim()||current;
-    const span=document.createElement('span');
-    span.id=id;span.style.cssText='font-size:15px;font-weight:700;';span.textContent=val;
-    input.replaceWith(span);
-    fetch(API+'/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:id,value:val})}).catch(()=>{});
-  }
-  input.addEventListener('blur',done);
-  input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=current;input.blur();}});
+function weekDates(){
+  const t=new Date(),s=new Date(t);s.setDate(t.getDate()-t.getDay());
+  return Array.from({length:7},(_,i)=>{const d=new Date(s);d.setDate(s.getDate()+i);return d;});
 }
-async function restoreSectionTitles(){
+function fd(d){return d.getDate()+'.'+(d.getMonth()+1);}
+
+function pick(el,day,date,time,isoDate){
+  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');selDay=day;selDate=date;selIsoDate=isoDate||'';selTime=time;
+  document.getElementById('info-day').textContent=day;
+  document.getElementById('info-date').textContent=date;
+  document.getElementById('info-time').textContent=time;
+  document.getElementById('slot-info').classList.add('visible');
+  const b=document.getElementById('confirm-btn');b.style.opacity='1';b.style.pointerEvents='auto';
+}
+
+function goStep2(){
+  const s=getSaved();
+  if(s){phone=s.phone;studentName=s.name;}
+  else{
+    const n=document.getElementById('name-field').value.trim();
+    const p=document.getElementById('phone-field').value.replace(/\D/g,'');
+    if(p.length<9){document.querySelector('.phone-wrap').style.borderColor='#ff4444';setTimeout(()=>document.querySelector('.phone-wrap').style.borderColor='',1200);return;}
+    phone=p;studentName=n||'תלמיד';setSaved(n||'תלמיד',p);
+  }
+  loadSchedule();setStep(2);
+}
+function goStep1(){setStep(1);initPhone();}
+async function goStep3(){
+  if(!selDay||!selTime)return;
   try{
-    const res=await fetch(API+'/api/settings');
+    await fetch('/api/appointments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:studentName,phone:'+972-'+phone,day:selDay,date:selDate,isoDate:selIsoDate,time:selTime,status:'pending'})});
+  }catch(e){}
+  document.getElementById('confirm-name').textContent=studentName;
+  document.getElementById('confirm-phone').textContent='+972-'+phone;
+  document.getElementById('confirm-day').textContent=selDay;
+  document.getElementById('confirm-date').textContent=selDate;
+  document.getElementById('confirm-time').textContent=selTime;
+  // Auto-send admin WA notification
+  // admin notified server-side
+  setStep(3);
+}
+function setStep(n){
+  document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('active',i===n-1));
+  [1,2,3].forEach(i=>{const si=document.getElementById('si-'+i);si.classList.remove('active','done');if(i===n)si.classList.add('active');if(i<n)si.classList.add('done');});
+}
+function openWA(){
+  window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('שלום! קבעתי שיעור ב-The Club Lab 🎧\nשם: '+studentName+'\nיום: '+selDay+' ('+selDate+')\nשעה: '+selTime+'\nטלפון: +972-'+phone),'_blank');
+}
+function bookAgain(){
+  selDay='';selDate='';selIsoDate='';selTime='';
+  document.getElementById('slot-info').classList.remove('visible');
+  const b=document.getElementById('confirm-btn');b.style.opacity='.4';b.style.pointerEvents='none';
+  loadSchedule();setStep(2);
+}
+document.querySelectorAll('.nav-links a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();document.getElementById(a.getAttribute('href').slice(1))?.scrollIntoView({behavior:'smooth'});});
+});
+async function loadContent(){
+  try{
+    const [newsRes,tipsRes]=await Promise.all([
+      fetch('/api/content/news'),
+      fetch('/api/content/tips')
+    ]);
+    const news=newsRes.ok?await newsRes.json():[];
+    const tips=tipsRes.ok?await tipsRes.json():[];
+    const ng=document.getElementById('news-grid');
+    const colors=['#ff2d8a','#888','#6ee7ff'];
+    if(news.length){
+      ng.innerHTML=news.slice(0,3).map((n,i)=>`
+        <div class="news-card">
+          <div class="news-dot" style="background:${colors[i%3]}"></div>
+          <div><div class="news-date">${n.date?formatDayName(n.date)+' '+formatDate(n.date):''}</div>
+            <div class="news-title">${n.title}</div>
+            <div class="news-body">${n.body||''}</div>
+          </div>
+        </div>`).join('');
+    }else{ng.innerHTML='';}
+    const tg=document.getElementById('tips-grid');
+    if(tips.length){
+      tg.innerHTML=tips.slice(0,3).map((t,i)=>`
+        <div class="tip-card">
+          <div class="tip-num">טיפ #${t.num||String(i+1).padStart(2,'0')}</div>
+          <div class="tip-title">${t.title}</div>
+          <div class="tip-body">${t.body||''}</div>
+        </div>`).join('');
+    }else{tg.innerHTML='';}
+  }catch(e){console.error('content error',e);}
+}
+initPhone();
+loadContent();
+(async()=>{
+  try{
+    const res=await fetch('/api/settings');
     const data=await res.json();
     ['news-section-title','tips-section-title'].forEach(id=>{
       const item=data.find(s=>s.key===id);
       if(item){const el=document.getElementById(id);if(el)el.textContent=item.value;}
     });
   }catch(e){}
-}
-
-init();
-restoreSectionTitles();
+})();
 </script>
 </body>
 </html>
