@@ -471,8 +471,9 @@ async function cycleStatus(id,cur,phone,name,day,date,time){
   const next=cur==='pending'?'confirmed':cur==='confirmed'?'cancelled':'pending';
   await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});
   if(next==='confirmed'&&phone){
+    const cleanPhone=phone.replace(/^972/,'').replace(/^0/,'');
     const msg=encodeURIComponent('🎧 שלום '+name+'!\nהשיעור שלך אושר ✅\nיום: '+day+(date?' ('+date+')':'')+'\nשעה: '+time+'\nמיקום: The Club Lab\nנתראה! 🎶');
-    window.open('https://wa.me/972'+phone.replace(/^0/,'')+'?text='+msg,'_blank');
+    window.open('https://wa.me/972'+cleanPhone+'?text='+msg,'_blank');
   }
   loadDiary();
 }
@@ -480,8 +481,9 @@ async function cycleStatus(id,cur,phone,name,day,date,time){
 async function approveAndNotify(id,phone,name,day,date,time){
   await fetch(API+'/api/appointments/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'confirmed'})});
   if(phone){
+    const cleanPhone=phone.replace(/^972/,'').replace(/^0/,'');
     const msg=encodeURIComponent('🎧 שלום '+name+'!\nהשיעור שלך אושר ✅\nיום: '+day+(date?' ('+date+')':'')+'\nשעה: '+time+'\nמיקום: The Club Lab\nנתראה! 🎶');
-    window.open('https://wa.me/972'+phone.replace(/^0/,'')+'?text='+msg,'_blank');
+    window.open('https://wa.me/972'+cleanPhone+'?text='+msg,'_blank');
   }
   loadDiary();
 }
