@@ -435,16 +435,21 @@ async function init(){
 // ── DIARY ──
 async function loadDiary(){
   try{
-    const res=await fetch(API+'/api/appointments/today');
-    const appts=await res.json();
-    allAppts=appts;
-    renderAppts('morning-list',appts.filter(a=>parseInt(a.time)<18));
-    renderAppts('evening-list',appts.filter(a=>parseInt(a.time)>=18));
+    const res=await fetch(API+'/api/appointments');
+    const all=await res.json();
+    allAppts=all;
+    // Show pending first, then confirmed, sorted by date+time
+    const pending=all.filter(a=>a.status==='pending');
+    const confirmed=all.filter(a=>a.status==='confirmed');
+    const cancelled=all.filter(a=>a.status==='cancelled');
+    const sorted=[...pending,...confirmed,...cancelled];
+    renderAppts('morning-list',sorted.filter(a=>parseInt(a.time||'0')<18));
+    renderAppts('evening-list',sorted.filter(a=>parseInt(a.time||'0')>=18));
     document.getElementById('diary-stats').innerHTML=`
-      <div class="stat-card hl"><div class="stat-label">תורים היום</div><div class="stat-val pink">${appts.length}</div></div>
-      <div class="stat-card"><div class="stat-label">ממתינים</div><div class="stat-val">${appts.filter(a=>a.status==='pending').length}</div></div>
-      <div class="stat-card"><div class="stat-label">אושרו</div><div class="stat-val">${appts.filter(a=>a.status==='confirmed').length}</div></div>
-      <div class="stat-card"><div class="stat-label">בוטלו</div><div class="stat-val">${appts.filter(a=>a.status==='cancelled').length}</div></div>`;
+      <div class="stat-card hl"><div class="stat-label">סה״כ</div><div class="stat-val pink">${all.length}</div></div>
+      <div class="stat-card"><div class="stat-label">ממתינים</div><div class="stat-val">${pending.length}</div></div>
+      <div class="stat-card"><div class="stat-label">אושרו</div><div class="stat-val">${confirmed.length}</div></div>
+      <div class="stat-card"><div class="stat-label">בוטלו</div><div class="stat-val">${cancelled.length}</div></div>`;
   }catch(e){console.error(e);}
 }
 
@@ -459,7 +464,7 @@ function renderAppts(cid,appts){
     const tm=(a.time||'').replace(/'/g,'`');
     return`<div class="appt ${a.status}">
       <span class="appt-time">${a.time}</span>
-      <div class="appt-info"><div class="appt-name">${a.name||a.phone}</div><div class="appt-type">${a.phone||''}</div></div>
+      <div class="appt-info"><div class="appt-name">${a.name||a.phone}</div><div class="appt-type">${a.day||''} ${a.date||''} · ${a.phone||''}</div></div>
       <span class="appt-status s-${a.status}" onclick="cycleStatus('${a._id}','${a.status}','${ph}','${nm}','${dy}','${dt}','${tm}')">${a.status==='confirmed'?'אושר':a.status==='pending'?'ממתין':'בוטל'}</span>
       <button style="background:${a.status==='pending'?'#25D366':'transparent'};border:${a.status==='pending'?'none':'1px solid var(--border)'};border-radius:6px;color:${a.status==='pending'?'#fff':'var(--muted)'};font-size:11px;font-weight:700;padding:3px 8px;cursor:pointer;display:${a.status==='pending'?'inline-block':'none'};" onclick="approveAndNotify('${a._id}','${ph}','${nm}','${dy}','${dt}','${tm}')">✓ אשר</button>
       <button class="del-btn" onclick="delAppt('${a._id}')">✕</button>
