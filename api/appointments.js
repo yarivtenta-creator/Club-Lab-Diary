@@ -27,9 +27,10 @@ router.get('/', async (req, res) => {
 router.get('/today', async (req, res) => {
   try {
     const today = new Date();
-    const dateStr = today.getDate() + '.' + (today.getMonth() + 1);
-    const isoStr = today.toISOString().split('T')[0];
-    // match by isoDate OR legacy date string
+    // Use Israel timezone (UTC+3) for date matching
+    const ilDate = new Date(today.getTime() + (3 * 60 * 60 * 1000));
+    const dateStr = ilDate.getUTCDate() + '.' + (ilDate.getUTCMonth() + 1);
+    const isoStr = ilDate.toISOString().split('T')[0];
     const appointments = await Appointment.find({
       $or: [{ isoDate: isoStr }, { date: dateStr }]
     }).sort({ time: 1 });
