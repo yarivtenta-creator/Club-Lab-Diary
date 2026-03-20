@@ -8,11 +8,11 @@ const AppointmentSchema = new mongoose.Schema({
   type: { type: String, default: 'DJ מתחיל' },
   day: String,
   date: String,
+  isoDate: String,
   time: String,
-  status: { type: String, default: 'pending' }, // pending, confirmed, cancelled
+  status: { type: String, default: 'pending' },
   createdAt: { type: Date, default: Date.now }
 });
-
 const Appointment = mongoose.model('Appointment', AppointmentSchema);
 
 // GET all appointments
@@ -28,18 +28,20 @@ router.get('/today', async (req, res) => {
   try {
     const today = new Date();
     const dateStr = today.getDate() + '.' + (today.getMonth() + 1);
-    const appointments = await Appointment.find({ date: dateStr }).sort({ time: 1 });
+    const isoStr = today.toISOString().split('T')[0];
+    // match by isoDate OR legacy date string
+    const appointments = await Appointment.find({
+      $or: [{ isoDate: isoStr }, { date: dateStr }]
+    }).sort({ time: 1 });
     res.json(appointments);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST new appointment (from landing page)
+// POST new appointment
 router.post('/', async (req, res) => {
   try {
     const appt = new Appointment(req.body);
     await appt.save();
-
-    // Auto-create or update client
     const Client = mongoose.model('Client');
     let client = await Client.findOne({ phone: req.body.phone });
     if (!client) {
@@ -54,7 +56,6 @@ router.post('/', async (req, res) => {
       client.lastVisit = new Date();
     }
     await client.save();
-
     res.json({ success: true, appointment: appt });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
