@@ -19,8 +19,9 @@ app.use('/api/clients', require('./api/clients'));
 app.use('/api/schedule', require('./api/schedule'));
 app.use('/api/content', require('./api/content'));
 app.use('/api/monthly', require('./api/monthly'));
+app.use('/api/settings', require('./api/settings'));
 
-// Admin page - before static middleware
+// Admin page
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/admin/index.html'));
 });
