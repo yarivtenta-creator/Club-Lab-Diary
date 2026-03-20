@@ -175,8 +175,8 @@ footer{text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);bor
       <div class="confirm-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff2d8a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div class="card-title" style="text-align:center">השיעור נקבע!</div>
-      <div class="card-sub" style="text-align:center;margin-bottom:14px">פרטי השיעור שלך</div>
+      <div class="card-title" style="text-align:center">בקשתך נקלטה במערכת!</div>
+      <div class="card-sub" style="text-align:center;margin-bottom:14px">ממתינה לאישור — תקבל הודעה בוואטסאפ</div>
       <div class="confirm-details" style="text-align:right">
         <div class="confirm-row"><span>שם</span><span id="confirm-name">—</span></div>
         <div class="confirm-row"><span>טלפון</span><span id="confirm-phone">—</span></div>
@@ -185,18 +185,14 @@ footer{text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);bor
         <div class="confirm-row"><span>שעה</span><span id="confirm-time">—</span></div>
         <div class="confirm-row"><span>מיקום</span><span>The Club Lab</span></div>
       </div>
-      <button class="whatsapp-btn" onclick="openWA()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        אישור בוואטסאפ
-      </button>
-      <br><button class="btn-secondary" onclick="bookAgain()">קביעת שיעור נוסף</button>
+      <button class="btn-secondary" onclick="bookAgain()">קביעת שיעור נוסף</button>
     </div>
   </div>
 </div>
 
 <div class="divider"></div>
 <div class="section" id="tips">
-  <div class="section-header"><div class="section-line line-yellow"></div><h2 id="tips-section-title">טיפים שבועיים של בן</h2></div>
+  <div class="section-header"><div class="section-line line-yellow"></div><h2 id="tips-section-title">טיפ של היום</h2></div>
   <div class="tips-grid" id="tips-grid">
     <div class="tip-card"><div class="tip-num">טוען...</div></div>
   </div>
@@ -219,7 +215,7 @@ footer{text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);bor
 <script>
 const WA='972548008645';
 const ADMIN_WA='972548008645';
-let selDay='',selDate='',selTime='',phone='',studentName='';
+let selDay='',selDate='',selIsoDate='',selTime='',phone='',studentName='';
 
 function getSaved(){try{return JSON.parse(localStorage.getItem('clublab_user'))||null;}catch(e){return null;}}
 function setSaved(n,p){localStorage.setItem('clublab_user',JSON.stringify({name:n,phone:p}));}
@@ -268,7 +264,7 @@ async function loadSchedule(){
       const dayName=dayNames[d.getDay()];
       const ds=d.getDate()+'.'+(d.getMonth()+1);
       const row=document.createElement('div');row.className='day-row';
-      row.innerHTML='<span class="day-label">'+dayName+'</span><div class="slots"></div>';
+      row.innerHTML='<span class="day-label">'+dayName+'<br><span style="font-size:10px;color:var(--muted);font-weight:400">'+ds+'</span></span><div class="slots"></div>';
       rows.appendChild(row);
       const sd=row.querySelector('.slots');
       (day.slots||[]).forEach(t=>{
@@ -276,7 +272,7 @@ async function loadSchedule(){
         const s=document.createElement('div');
         s.className='slot'+(ev?' evening':'')+(bk?' booked':'');
         s.textContent=t;
-        if(!bk)s.onclick=()=>pick(s,dayName,ds,t);
+        if(!bk)s.onclick=()=>pick(s,dayName,ds,t,day.date);
         sd.appendChild(s);
       });
     });
@@ -306,9 +302,9 @@ function weekDates(){
 }
 function fd(d){return d.getDate()+'.'+(d.getMonth()+1);}
 
-function pick(el,day,date,time){
+function pick(el,day,date,time,isoDate){
   document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
-  el.classList.add('selected');selDay=day;selDate=date;selTime=time;
+  el.classList.add('selected');selDay=day;selDate=date;selIsoDate=isoDate||'';selTime=time;
   document.getElementById('info-day').textContent=day;
   document.getElementById('info-date').textContent=date;
   document.getElementById('info-time').textContent=time;
@@ -330,15 +326,17 @@ function goStep2(){
 function goStep1(){setStep(1);initPhone();}
 async function goStep3(){
   if(!selDay||!selTime)return;
-  try{await fetch('/api/appointments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:studentName,phone:'+972-'+phone,day:selDay,date:selDate,time:selTime,status:'pending'})});}catch(e){}
+  try{
+    await fetch('/api/appointments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:studentName,phone:'+972-'+phone,day:selDay,date:selDate,isoDate:selIsoDate,time:selTime,status:'pending'})});
+  }catch(e){}
   document.getElementById('confirm-name').textContent=studentName;
   document.getElementById('confirm-phone').textContent='+972-'+phone;
   document.getElementById('confirm-day').textContent=selDay;
   document.getElementById('confirm-date').textContent=selDate;
   document.getElementById('confirm-time').textContent=selTime;
-  // Send admin WA notification
-  const adminMsg=encodeURIComponent('🎧 הזמנה חדשה!\nשם: '+studentName+'\nטלפון: +972-'+phone+'\nיום: '+selDay+' ('+selDate+')\nשעה: '+selTime);
-  setTimeout(()=>window.open('https://wa.me/'+ADMIN_WA+'?text='+adminMsg,'_blank'),1500);
+  // Auto-send admin WA notification
+  const adminMsg=encodeURIComponent('🎧 בקשת שיעור חדשה!\nשם: '+studentName+'\nטלפון: +972-'+phone+'\nיום: '+selDay+' ('+selDate+')\nשעה: '+selTime+'\n\nלאישור היכנס לאדמין');
+  window.open('https://wa.me/'+ADMIN_WA+'?text='+adminMsg,'_blank');
   setStep(3);
 }
 function setStep(n){
@@ -349,7 +347,7 @@ function openWA(){
   window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('שלום! קבעתי שיעור ב-The Club Lab 🎧\nשם: '+studentName+'\nיום: '+selDay+' ('+selDate+')\nשעה: '+selTime+'\nטלפון: +972-'+phone),'_blank');
 }
 function bookAgain(){
-  selDay='';selDate='';selTime='';
+  selDay='';selDate='';selIsoDate='';selTime='';
   document.getElementById('slot-info').classList.remove('visible');
   const b=document.getElementById('confirm-btn');b.style.opacity='.4';b.style.pointerEvents='none';
   loadSchedule();setStep(2);
@@ -390,8 +388,6 @@ async function loadContent(){
 }
 initPhone();
 loadContent();
-
-// sync section titles from backend
 (async()=>{
   try{
     const res=await fetch('/api/settings');
