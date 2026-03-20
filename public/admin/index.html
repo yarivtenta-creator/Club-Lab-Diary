@@ -461,7 +461,7 @@ function renderAppts(cid,appts){
       <span class="appt-time">${a.time}</span>
       <div class="appt-info"><div class="appt-name">${a.name||a.phone}</div><div class="appt-type">${a.phone||''}</div></div>
       <span class="appt-status s-${a.status}" onclick="cycleStatus('${a._id}','${a.status}','${ph}','${nm}','${dy}','${dt}','${tm}')">${a.status==='confirmed'?'אושר':a.status==='pending'?'ממתין':'בוטל'}</span>
-      ${a.status==='pending'?`<button style="background:#25D366;border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;cursor:pointer;" onclick="approveAndNotify('${a._id}','${ph}','${nm}','${dy}','${dt}','${tm}')">✓ אשר</button>`:''}
+      <button style="background:${a.status==='pending'?'#25D366':'transparent'};border:${a.status==='pending'?'none':'1px solid var(--border)'};border-radius:6px;color:${a.status==='pending'?'#fff':'var(--muted)'};font-size:11px;font-weight:700;padding:3px 8px;cursor:pointer;display:${a.status==='pending'?'inline-block':'none'};" onclick="approveAndNotify('${a._id}','${ph}','${nm}','${dy}','${dt}','${tm}')">✓ אשר</button>
       <button class="del-btn" onclick="delAppt('${a._id}')">✕</button>
     </div>`;
   }).join('')+'<div class="empty-slot" onclick="openModal()">+ הוסף שיעור</div>';
