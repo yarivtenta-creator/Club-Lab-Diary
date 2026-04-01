@@ -9,7 +9,35 @@ app.use(express.json());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB connected'))
+  .then(async () => {
+    console.log('✅ MongoDB connected');
+    
+    // Seed default tips and news if empty
+    try {
+      const tipCount = await Content.countDocuments({ type: 'tip' });
+      const newsCount = await Content.countDocuments({ type: 'news' });
+      
+      if (tipCount === 0) {
+        await Content.insertMany([
+          { type: 'tip', title: "טיפ של היום - קצב", description: "שמרו על קצב עדין בתחילת השיעור", category: "טכניקה" },
+          { type: 'tip', title: "טיפ של היום - ציוד", description: "בדקו את כל הציוד לפני השיעור", category: "הכנה" },
+          { type: 'tip', title: "טיפ של היום - כימיה", description: "התאמת המוזיקה למצב הרוח של הקבוצה", category: "פדגוגיה" }
+        ]);
+        console.log('📌 Default tips seeded');
+      }
+      
+      if (newsCount === 0) {
+        await Content.insertMany([
+          { type: 'news', title: "שיעורים חדשים זמינים", description: "הוספנו שיעורים חדשים בטכניקות מתקדמות", category: "עדכון" },
+          { type: 'news', title: "תחרויות Club Lab", description: "השנה אנחנו מוזמנים לתחרויות בינלאומיות", category: "חדשות" },
+          { type: 'news', title: "סדנה חדשה עם Ben", description: "סדנה בן-דרך בנושא ייצור מוזיקה", category: "אירוע" }
+        ]);
+        console.log('📰 Default news seeded');
+      }
+    } catch (e) {
+      console.error('Seeding error:', e.message);
+    }
+  })
   .catch(err => console.error('❌ MongoDB error:', err));
 
 // Content Schema for Tips and News
