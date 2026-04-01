@@ -63,13 +63,18 @@ app.use('/api/settings', require('./api/settings'));
 app.get('/api/content/tips', async (req, res) => {
   try {
     const tips = await Content.find({ type: 'tip' }).sort({ createdAt: -1 }).limit(10);
+    
+    // Always return hardcoded defaults - works even if DB is empty
+    const defaultTips = [
+      { num: '01', title: "טיפ של היום - קצב", body: "שמרו על קצב עדין בתחילת השיעור" },
+      { num: '02', title: "טיפ של היום - ציוד", body: "בדקו את כל הציוד לפני השיעור" },
+      { num: '03', title: "טיפ של היום - כימיה", body: "התאמת המוזיקה למצב הרוח של הקבוצה" }
+    ];
+    
     if (tips.length === 0) {
-      return res.json([
-        { num: '01', title: "טיפ של היום - קצב", body: "שמרו על קצב עדין בתחילת השיעור" },
-        { num: '02', title: "טיפ של היום - ציוד", body: "בדקו את כל הציוד לפני השיעור" },
-        { num: '03', title: "טיפ של היום - כימיה", body: "התאמת המוזיקה למצב הרוח של הקבוצה" }
-      ]);
+      return res.json(defaultTips);
     }
+    
     const formatted = tips.map((t, i) => ({
       num: String(i + 1).padStart(2, '0'),
       title: t.title,
@@ -78,20 +83,30 @@ app.get('/api/content/tips', async (req, res) => {
     res.json(formatted);
   } catch (error) {
     console.error('Error fetching tips:', error);
-    res.status(500).json([]);
+    // Return defaults on error too
+    res.json([
+      { num: '01', title: "טיפ של היום - קצב", body: "שמרו על קצב עדין בתחילת השיעור" },
+      { num: '02', title: "טיפ של היום - ציוד", body: "בדקו את כל הציוד לפני השיעור" },
+      { num: '03', title: "טיפ של היום - כימיה", body: "התאמת המוזיקה למצב הרוח של הקבוצה" }
+    ]);
   }
 });
 
 app.get('/api/content/news', async (req, res) => {
   try {
     const news = await Content.find({ type: 'news' }).sort({ createdAt: -1 }).limit(10);
+    
+    // Always return hardcoded defaults - works even if DB is empty
+    const defaultNews = [
+      { date: new Date().toISOString().split('T')[0], title: "שיעורים חדשים זמינים", body: "הוספנו שיעורים חדשים בטכניקות מתקדמות" },
+      { date: new Date().toISOString().split('T')[0], title: "תחרויות Club Lab", body: "השנה אנחנו מוזמנים לתחרויות בינלאומיות" },
+      { date: new Date().toISOString().split('T')[0], title: "סדנה חדשה עם Ben", body: "סדנה בן-דרך בנושא ייצור מוזיקה" }
+    ];
+    
     if (news.length === 0) {
-      return res.json([
-        { date: new Date().toISOString().split('T')[0], title: "שיעורים חדשים זמינים", body: "הוספנו שיעורים חדשים בטכניקות מתקדמות" },
-        { date: new Date().toISOString().split('T')[0], title: "תחרויות Club Lab", body: "השנה אנחנו מוזמנים לתחרויות בינלאומיות" },
-        { date: new Date().toISOString().split('T')[0], title: "סדנה חדשה עם Ben", body: "סדנה בן-דרך בנושא ייצור מוזיקה" }
-      ]);
+      return res.json(defaultNews);
     }
+    
     const formatted = news.map(n => ({
       date: n.createdAt ? n.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       title: n.title,
@@ -100,7 +115,12 @@ app.get('/api/content/news', async (req, res) => {
     res.json(formatted);
   } catch (error) {
     console.error('Error fetching news:', error);
-    res.status(500).json([]);
+    // Return defaults on error too
+    res.json([
+      { date: new Date().toISOString().split('T')[0], title: "שיעורים חדשים זמינים", body: "הוספנו שיעורים חדשים בטכניקות מתקדמות" },
+      { date: new Date().toISOString().split('T')[0], title: "תחרויות Club Lab", body: "השנה אנחנו מוזמנים לתחרויות בינלאומיות" },
+      { date: new Date().toISOString().split('T')[0], title: "סדנה חדשה עם Ben", body: "סדנה בן-דרך בנושא ייצור מוזיקה" }
+    ]);
   }
 });
 
