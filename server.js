@@ -36,19 +36,21 @@ app.get('/api/content/tips', async (req, res) => {
   try {
     const tips = await Content.find({ type: 'tip' }).sort({ createdAt: -1 }).limit(10);
     if (tips.length === 0) {
-      return res.json({
-        success: true,
-        data: [
-          { _id: '1', title: "טיפ של היום - קצב", description: "שמרו על קצב עדין בתחילת השיעור", category: "טכניקה" },
-          { _id: '2', title: "טיפ של היום - ציוד", description: "בדקו את כל הציוד לפני השיעור", category: "הכנה" },
-          { _id: '3', title: "טיפ של היום - כימיה", description: "התאמת המוזיקה למצב הרוח של הקבוצה", category: "פדגוגיה" }
-        ]
-      });
+      return res.json([
+        { num: '01', title: "טיפ של היום - קצב", body: "שמרו על קצב עדין בתחילת השיעור" },
+        { num: '02', title: "טיפ של היום - ציוד", body: "בדקו את כל הציוד לפני השיעור" },
+        { num: '03', title: "טיפ של היום - כימיה", body: "התאמת המוזיקה למצב הרוח של הקבוצה" }
+      ]);
     }
-    res.json({ success: true, data: tips });
+    const formatted = tips.map((t, i) => ({
+      num: String(i + 1).padStart(2, '0'),
+      title: t.title,
+      body: t.description
+    }));
+    res.json(formatted);
   } catch (error) {
     console.error('Error fetching tips:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json([]);
   }
 });
 
@@ -56,19 +58,21 @@ app.get('/api/content/news', async (req, res) => {
   try {
     const news = await Content.find({ type: 'news' }).sort({ createdAt: -1 }).limit(10);
     if (news.length === 0) {
-      return res.json({
-        success: true,
-        data: [
-          { _id: '1', title: "שיעורים חדשים זמינים", description: "הוספנו שיעורים חדשים בטכניקות מתקדמות", category: "עדכון" },
-          { _id: '2', title: "תחרויות Club Lab", description: "השנה אנחנו מוזמנים לתחרויות בינלאומיות", category: "חדשות" },
-          { _id: '3', title: "סדנה חדשה עם Ben", description: "סדנה בן-דרך בנושא ייצור מוזיקה", category: "אירוע" }
-        ]
-      });
+      return res.json([
+        { date: new Date().toISOString().split('T')[0], title: "שיעורים חדשים זמינים", body: "הוספנו שיעורים חדשים בטכניקות מתקדמות" },
+        { date: new Date().toISOString().split('T')[0], title: "תחרויות Club Lab", body: "השנה אנחנו מוזמנים לתחרויות בינלאומיות" },
+        { date: new Date().toISOString().split('T')[0], title: "סדנה חדשה עם Ben", body: "סדנה בן-דרך בנושא ייצור מוזיקה" }
+      ]);
     }
-    res.json({ success: true, data: news });
+    const formatted = news.map(n => ({
+      date: n.createdAt ? n.createdAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      title: n.title,
+      body: n.description
+    }));
+    res.json(formatted);
   } catch (error) {
     console.error('Error fetching news:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json([]);
   }
 });
 
