@@ -1,0 +1,7 @@
+node_modules/
+.env
+.DS_Store
+*.log
+*.zip
+api/bg_main.png
+api/logo.jpg
