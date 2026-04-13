@@ -120,7 +120,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:var(--muted);border-t
 <nav>
   <div class="logo-wrap">
     <img class="logo-img" src="/images/logo.jpg" alt="The Club Lab">
-    <div class="logo-text"><span class="logo-main">THE CLUB LAB</span><span class="logo-sub">המעבדה למקצועיות הקלאב</span></div>
+    <div class="logo-text"><span class="logo-main">THE CLUB LAB</span><span class="logo-sub">המעבדה למקצועות הקלאב</span></div>
   </div>
   <ul class="nav-links">
     <li><a href="#booking">קביעת תור</a></li>
@@ -132,7 +132,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:var(--muted);border-t
 
 <div class="hero">
   <img class="hero-logo" src="/images/logo.jpg" alt="The Club Lab Logo">
-  <div class="hero-badge"><span class="pulse"></span>המעבדה למקצועיות הקלאב</div>
+  <div class="hero-badge"><span class="pulse"></span>המעבדה למקצועות הקלאב</div>
   <h1>קבע תור<br><span class="h1-accent">תוך שניות</span></h1>
   <p class="hero-sub">הכנס מספר טלפון, בחר זמן שמתאים לך — ואישור יגיע ישירות לוואטסאפ</p>
 
@@ -146,8 +146,9 @@ footer{text-align:center;padding:22px;font-size:12px;color:var(--muted);border-t
     </div>
 
     <div class="booking-card step active" id="step1">
-      <div class="card-title">מה מספר הטלפון שלך?</div>
+      <div class="card-title">פרטים אישיים</div>
       <div class="card-sub">נשלח אישור לוואטסאפ</div>
+      <input id="name-field" type="text" placeholder="שם מלא" style="width:100%;background:var(--surface2);border:1px solid var(--pink-border);border-radius:var(--radius);color:var(--text);font-family:'Heebo',sans-serif;font-size:15px;padding:12px 13px;outline:none;margin-bottom:13px;direction:rtl;">
       <div class="phone-wrap">
         <span class="phone-prefix">🇮🇱 +972</span>
         <input class="phone-input" type="tel" id="phone-field" placeholder="05X-XXX-XXXX" maxlength="10">
@@ -175,6 +176,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:var(--muted);border-t
       <div class="card-title" style="text-align:center">התור נקבע!</div>
       <div class="card-sub" style="text-align:center;margin-bottom:14px">פרטי התור שלך</div>
       <div class="confirm-details" style="text-align:right">
+        <div class="confirm-row"><span>שם</span><span id="confirm-name">—</span></div>
         <div class="confirm-row"><span>טלפון</span><span id="confirm-phone">—</span></div>
         <div class="confirm-row"><span>יום</span><span id="confirm-day">—</span></div>
         <div class="confirm-row"><span>תאריך</span><span id="confirm-date">—</span></div>
@@ -224,7 +226,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:var(--muted);border-t
     <div class="about-stat"><div class="num">8+</div><div class="label">שנות ניסיון</div></div>
     <div class="about-stat"><div class="num">100%</div><div class="label">מקצועיות</div></div>
   </div>
-  <div class="about-desc">The Club Lab היא המעבדה למקצועיות הקלאב — מרכז הכשרה מוביל לדיג'ייז ומפיקים מוזיקליים. אצלנו תמצא תוכניות לימוד מותאמות אישית, ציוד מקצועי ברמה הגבוהה ביותר, וצוות מדריכים עם ניסיון בתעשייה.</div>
+  <div class="about-desc">The Club Lab היא המעבדה למקצועות הקלאב — מרכז הכשרה מוביל לדיג'ייז ומפיקים מוזיקליים. אצלנו תמצא תוכניות לימוד מותאמות אישית, ציוד מקצועי ברמה הגבוהה ביותר, וצוות מדריכים עם ניסיון בתעשייה.</div>
 </div>
 
 <footer>
@@ -235,7 +237,7 @@ footer{text-align:center;padding:22px;font-size:12px;color:var(--muted);border-t
 
 <script>
 const WA = '972548008645';
-let selDay='',selDate='',selIsoDate='',selTime='',phone='';
+let selDay='',selDate='',selIsoDate='',selTime='',phone='',name='';
 
 async function loadSchedule(){
   document.getElementById('week-label').textContent = 'טוען...';
@@ -309,9 +311,11 @@ function selectSlot(el, day, time, isoDate, displayDate){
 }
 
 function goStep2(){
+  const n=document.getElementById('name-field').value.trim();
   const p=document.getElementById('phone-field').value.replace(/\D/g,'');
+  if(!n){document.getElementById('name-field').style.borderColor='#ff4444';setTimeout(()=>document.getElementById('name-field').style.borderColor='',1200);return;}
   if(p.length<9){document.querySelector('.phone-wrap').style.borderColor='#ff4444';setTimeout(()=>document.querySelector('.phone-wrap').style.borderColor='',1200);return;}
-  phone=p;loadSchedule();setStep(2);
+  name=n;phone=p;loadSchedule();setStep(2);
 }
 function goStep1(){setStep(1);}
 async function goStep3(){
@@ -320,6 +324,7 @@ async function goStep3(){
   btn.style.opacity='.6';btn.style.pointerEvents='none';
   try {
     await fetch('/api/appointments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      name:name,
       phone:'+972-'+phone,
       day:selDay,
       date:selDate,
@@ -328,6 +333,7 @@ async function goStep3(){
       status:'pending'
     })});
   } catch(e){console.error(e);}
+  document.getElementById('confirm-name').textContent=name;
   document.getElementById('confirm-phone').textContent='+972-'+phone;
   document.getElementById('confirm-day').textContent=selDay;
   document.getElementById('confirm-date').textContent=selDate;
@@ -339,10 +345,10 @@ function setStep(n){
   [1,2,3].forEach(i=>{const si=document.getElementById('si-'+i);si.classList.remove('active','done');if(i===n)si.classList.add('active');if(i<n)si.classList.add('done');});
 }
 function openWhatsApp(){
-  const msg=encodeURIComponent('שלום! קבעתי תור ב-The Club Lab 🎧\nיום: '+selDay+'\nתאריך: '+selDate+'\nשעה: '+selTime+'\nטלפון: +972-'+phone);
+  const msg=encodeURIComponent('שלום! קבעתי תור ב-The Club Lab 🎧\nשם: '+name+'\nיום: '+selDay+'\nתאריך: '+selDate+'\nשעה: '+selTime+'\nטלפון: +972-'+phone);
   window.open('https://wa.me/'+WA+'?text='+msg,'_blank');
 }
-function resetBooking(){selDay='';selIsoDate='';selDate='';selTime='';phone='';document.getElementById('phone-field').value='';document.getElementById('slot-info').classList.remove('visible');const btn=document.getElementById('confirm-btn');btn.style.opacity='.4';btn.style.pointerEvents='none';setStep(1);}
+function resetBooking(){selDay='';selIsoDate='';selDate='';selTime='';phone='';name='';document.getElementById('name-field').value='';document.getElementById('phone-field').value='';document.getElementById('slot-info').classList.remove('visible');const btn=document.getElementById('confirm-btn');btn.style.opacity='.4';btn.style.pointerEvents='none';setStep(1);}
 
 document.querySelectorAll('.nav-links a').forEach(a=>{
   a.addEventListener('click',e=>{e.preventDefault();document.getElementById(a.getAttribute('href').slice(1))?.scrollIntoView({behavior:'smooth'});});
