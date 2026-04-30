@@ -1,0 +1,38 @@
+CHAT AUDIT SUMMARY
+==================
+Source: Visible chat only (3 turns accessible — no uploaded or exported chat file)
+Date generated: 2026-04-30
+
+NOTE: Only 3 turns of chat history are visible to this session.
+If prior work existed in an earlier session or hidden context, it is NOT included here.
+
+────────────────────────────────────────
+COMPLETED
+────────────────────────────────────────
+- Nothing was completed before Turn 3. The session opened with "exit" (Turn 1),
+  received an overextended response (Turn 2), then received the audit request (Turn 3).
+- Audit Excel file generated: chat_audit_input_output.xlsx (5 tabs)
+- Audit TXT file generated: chat_audit_summary.txt (this file)
+
+────────────────────────────────────────
+NOT COMPLETED
+────────────────────────────────────────
+- No prior tasks found in the visible chat — none to mark incomplete.
+- Older / hidden chat history: NOT accessible. Cannot audit what is not visible.
+
+────────────────────────────────────────
+MAIN MISTAKES
+────────────────────────────────────────
+1. Turn 2: Responded to "exit" (a one-word session-close signal) with a
+   multi-sentence explanation of how to exit Claude Code, then added a
+   follow-up question: "Is there anything else you'd like help with before you go?"
+   — This directly contradicted the user's exit signal.
+
+2. Turn 2: Added an unnecessary offer of continued help after an exit signal.
+   Correct behavior: one short acknowledgement, then stop.
+
+────────────────────────────────────────
+EXACT NEXT STEP ONLY
+────────────────────────────────────────
+Confirm both files are accessible and correct, then take no further action
+unless the user explicitly gives a new instruction.
