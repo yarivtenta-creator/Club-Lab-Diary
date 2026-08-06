@@ -56,7 +56,7 @@ Ktiv Maleh (full spelling) adds vav and yod to indicate vowels. Always use Ktiv 
 | בית (bayit) | בית (beit) | בית ספר (school) |
 | דבר (davar) | דבר (dvar) | דבר תורה (Torah teaching) |
 | שם (shem) | שם (shem) | שם משפחה (family name) |
-| ספר (sefer) | ספר (sifrei) | ספרי ילדים (children's books, pl.) |
+| ספרים (sfarim) | ספרי (sifrei) | ספרי ילדים (children's books, pl.) |
 
 **Rule:** In smichut, only the LAST noun takes the definite article "ha-":
 - Correct: בית הספר (beit ha-sefer)
