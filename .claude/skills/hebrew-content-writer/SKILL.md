@@ -142,7 +142,7 @@ English nouns taking Hebrew grammar:
 
 **Numerals and dates:**
 - In running body copy, prefer digits for most numbers ("3 ימים", "תוך 24 שעות"); spelling out is reserved for formal/legal text or numbers that open a sentence.
-- Number-gender agreement for 1-10: the numeral agrees with the gender of the noun it counts. Masculine noun -> masculine numeral: "שלושה ימים" (three days). Feminine noun -> feminine numeral: "שלוש שנים" (three years). The trap is morphological, not agreement: the masculine numeral is the one carrying the ־ה ending that looks feminine, so שלושה is masculine and שלוש is feminine.
+- Number-gender agreement for 1-10: the numeral agrees with the gender of the noun it counts. Masculine noun -> masculine numeral: "שלושה ימים" (three days). Feminine noun -> feminine numeral: "שלוש שנים" (three years). The trap is morphological, not agreement: for 3-7 and 9-10 it is the masculine numeral that carries the ־ה ending which looks feminine (שלושה is masculine, שלוש is feminine). The ending is not a reliable cue outside that range -- masculine אחד and שניים carry no ־ה, and for 8 both genders are written שמונה in unvocalized text.
 - Dates follow Israeli convention `DD/MM/YYYY` and 24-hour time. See `israeli-ui-design-system` for formatting in UI components.
 - Hebrew quotation marks: Hebrew uses the same `"` for quotation in practice, but note that gershayim `"` and geresh `'` are reserved for acronyms (צה"ל) and abbreviations - do not let them double as quote marks in the same span.
 
