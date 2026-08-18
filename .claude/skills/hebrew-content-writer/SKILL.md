@@ -30,7 +30,8 @@ Modern Hebrew content uses ktiv maleh (plene spelling) with vav and yod for vowe
 **Smichut (Construct State) Rules:**
 - First noun loses definite article: "beit ha-sefer" (the school) not "ha-beit ha-sefer"
 - First noun may change form: bayit -> beit, yom -> yom (unchanged)
-- Adjectives agree with the LAST noun in the chain
+- Adjectives agree with the noun they actually modify, which is usually the head (first) noun -- not automatically the last: בית הכנסת הגדול (masc. הגדול agrees with בית, not with the feminine הכנסת)
+- In a definite chain the adjective takes ha-, even though the first noun does not: בית הספר הגדול
 
 **Direct Object Marker (et):**
 - Required before definite direct objects: "ra'iti ET ha-sefer" (I saw the book)
@@ -70,7 +71,7 @@ Use masculine plural for mixed groups. Standard in government, legal, academic w
 | Missing et | ראיתי הכלב | ראיתי את הכלב | Definite direct object needs et |
 | Wrong gender agreement | הילדה הלך | הילדה הלכה | Verb must match subject gender |
 | Mixed ktiv | תוכנה/תכנה in same text | Pick one consistently | Use ktiv maleh throughout |
-| Incorrect vav ha-hipukh | ואז הוא הולך | ואז הוא הלך | Vav ha-hipukh is biblical, not modern |
+| Biblical vav ha-hipukh in modern text | ויאמר להם | ואז הוא אמר להם | Vav ha-hipukh is biblical, not modern -- do not "fix" ordinary present-tense narration such as ואז הוא הולך |
 | Colloquial in formal text | נגיד ש... | לדוגמה... | Match register to context |
 
 ### Step 5: Hebrew SEO Optimization
@@ -141,7 +142,7 @@ English nouns taking Hebrew grammar:
 
 **Numerals and dates:**
 - In running body copy, prefer digits for most numbers ("3 ימים", "תוך 24 שעות"); spelling out is reserved for formal/legal text or numbers that open a sentence.
-- Number-gender agreement for 1-10: Hebrew numbers take the OPPOSITE gender form of the noun they count (a known trap). With a masculine noun use the feminine-form number: "שלושה ימים" (three days, masc. noun). With a feminine noun use the masculine-form number: "שלוש שנים" (three years, fem. noun).
+- Number-gender agreement for 1-10: the numeral agrees with the gender of the noun it counts. Masculine noun -> masculine numeral: "שלושה ימים" (three days). Feminine noun -> feminine numeral: "שלוש שנים" (three years). The trap is morphological, not agreement: for 3-7 and 9-10 it is the masculine numeral that carries the ־ה ending which looks feminine (שלושה is masculine, שלוש is feminine). The ending is not a reliable cue outside that range -- masculine אחד and שניים carry no ־ה, and for 8 both genders are written שמונה in unvocalized text.
 - Dates follow Israeli convention `DD/MM/YYYY` and 24-hour time. See `israeli-ui-design-system` for formatting in UI components.
 - Hebrew quotation marks: Hebrew uses the same `"` for quotation in practice, but note that gershayim `"` and geresh `'` are reserved for acronyms (צה"ל) and abbreviations - do not let them double as quote marks in the same span.
 
